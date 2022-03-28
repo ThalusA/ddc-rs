@@ -1,6 +1,8 @@
 mod mccs;
+mod neon_bindings;
 
-use ddc;
+use neon_bindings::{get_brightness, set_brightness, get_contrast, set_contrast, list_infos};
+use neon::prelude::*;
 use ddc::{Ddc, FeatureCode, VcpValue};
 use ddc_hi::{DisplayInfo};
 pub use ddc_hi::Display;
@@ -11,7 +13,7 @@ trait EnhancedDisplay {
     fn get_value(&mut self, code: FeatureCode, error: Error) -> Result<VcpValue, Error>;
     fn set_value(&mut self, code: FeatureCode, error: Error, value: u16) -> Result<(), Error>;
 
-    fn get(id: String) -> Option<Self> where Self: Sized;
+    fn get(id: String) -> Option<Display>;
     fn list_infos() -> Vec<DisplayInfo>;
 
     fn get_brightness(&mut self) -> Result<VcpValue, Error>;
@@ -39,7 +41,7 @@ impl EnhancedDisplay for Display {
         }
     }
 
-    fn get(id: String) -> Option<Self> {
+    fn get(id: String) -> Option<Display> {
         for mut display in Display::enumerate() {
             let option = match display.update_capabilities() {
                 Ok(()) => if display.info.id == id {
@@ -88,4 +90,14 @@ impl EnhancedDisplay for Display {
                        anyhow!("This display doesn't support contrast operations"),
                        value)
     }
+}
+
+#[neon::main]
+fn main(mut cx: ModuleContext) -> NeonResult<()> {
+    cx.export_function("get_brightness", get_brightness)?;
+    cx.export_function("set_brightness", set_brightness)?;
+    cx.export_function("get_contrast", get_contrast)?;
+    cx.export_function("set_contrast", set_contrast)?;
+    cx.export_function("list_infos", list_infos)?;
+    Ok(())
 }

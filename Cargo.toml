@@ -2,10 +2,14 @@
 name = "ddc-enhanced-rs"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+exclude = ["index.node"]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+crate-type = ["cdylib"]
 
 [dependencies]
 ddc = "0.2.2"
 anyhow = "1.0.56"
 ddc-hi = "0.4.1"
+neon = {version = "0.10.0", default-features=false, features=["napi-latest"]}
