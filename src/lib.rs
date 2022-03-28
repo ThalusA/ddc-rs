@@ -12,7 +12,7 @@ trait EnhancedDisplay {
     fn set_value(&mut self, code: FeatureCode, error: Error, value: u16) -> Result<(), Error>;
 
     fn get(id: String) -> Option<Self>;
-    fn list() -> Vec<DisplayInfo>;
+    fn list_infos() -> Vec<DisplayInfo>;
 
     fn get_brightness(&mut self) -> Result<VcpValue, Error>;
     fn set_brightness(&mut self, value: u16) -> Result<(), Error>;
@@ -51,7 +51,7 @@ impl EnhancedDisplay for Display {
         Option::None
     }
 
-    fn list() -> Vec<DisplayInfo> {
+    fn list_infos() -> Vec<DisplayInfo> {
         let mut displays_info = vec![];
         for mut display in Display::enumerate() {
             match display.update_capabilities() {
