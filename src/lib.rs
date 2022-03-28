@@ -4,14 +4,14 @@ use ddc;
 use ddc::{Ddc, FeatureCode, VcpValue};
 use ddc_hi::{DisplayInfo};
 pub use ddc_hi::Display;
-use anyhow::{Error, Context, anyhow};
-use once_cell::sync::Lazy;
+use anyhow::{Error, anyhow};
+
 
 trait EnhancedDisplay {
     fn get_value(&mut self, code: FeatureCode, error: Error) -> Result<VcpValue, Error>;
     fn set_value(&mut self, code: FeatureCode, error: Error, value: u16) -> Result<(), Error>;
 
-    fn get(id: String) -> Option<Self>;
+    fn get(id: String) -> Option<Self> where Self: Sized;
     fn list_infos() -> Vec<DisplayInfo>;
 
     fn get_brightness(&mut self) -> Result<VcpValue, Error>;
@@ -41,11 +41,16 @@ impl EnhancedDisplay for Display {
 
     fn get(id: String) -> Option<Self> {
         for mut display in Display::enumerate() {
-            match display.update_capabilities() {
+            let option = match display.update_capabilities() {
                 Ok(()) => if display.info.id == id {
                     Option::from(display)
+                } else {
+                    Option::None
                 }
-                Err(_) => {}
+                Err(_) => {Option::None}
+            };
+            if option.is_some() {
+                return option;
             }
         }
         Option::None
@@ -55,7 +60,7 @@ impl EnhancedDisplay for Display {
         let mut displays_info = vec![];
         for mut display in Display::enumerate() {
             match display.update_capabilities() {
-                Ok(()) => displays_info.append(&mut display.info),
+                Ok(()) => displays_info.push(display.info),
                 Err(_) => {}
             };
         }

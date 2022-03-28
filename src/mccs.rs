@@ -1,6 +1,6 @@
 // Full list of MCCS v2.2a VCP codes.
 
-#[repr(ddc::FeatureCode)]
+#[repr(u8)]
 pub enum PresetOperation {
     CodePage = 0x00,
     RestoreFactoryColorDefaults = 0x08,
@@ -11,7 +11,7 @@ pub enum PresetOperation {
     SaveRestoreSettings = 0xb0,
 }
 
-#[repr(ddc::FeatureCode)]
+#[repr(u8)]
 pub enum ImageAdjustment {
     SixAxisHueControlBlue = 0x9f,
     SixAxisHueControlCyan = 0x9e,
@@ -74,7 +74,7 @@ pub enum ImageAdjustment {
     WindowTransparency = 0xa7,
 }
 
-#[repr(ddc::FeatureCode)]
+#[repr(u8)]
 pub enum DisplayControl {
     DisplayControllerId = 0xc8,
     DisplayFirmwareLevel = 0xc9,
@@ -90,7 +90,7 @@ pub enum DisplayControl {
     VerticalFrequency = 0xae,
 }
 
-#[repr(ddc::FeatureCode)]
+#[repr(u8)]
 pub enum Geometry {
     BottomCornerFlare = 0x4a,
     BottomCornerHook = 0x4c,
@@ -127,7 +127,7 @@ pub enum Geometry {
     WindowPositionTlY = 0x96,
 }
 
-#[repr(ddc::FeatureCode)]
+#[repr(u8)]
 pub enum Miscellaneous {
     ActiveControl = 0x52,
     AmbientLightSensor = 0x66,
@@ -154,7 +154,7 @@ pub enum Miscellaneous {
     TvChannelUpDown = 0x8b,
 }
 
-#[repr(ddc::FeatureCode)]
+#[repr(u8)]
 pub enum Audio {
     AudioBalanceLR = 0x93,
     AudioBass = 0x91,
@@ -167,7 +167,7 @@ pub enum Audio {
     AudioTreble = 0x8f,
 }
 
-#[repr(ddc::FeatureCode)]
+#[repr(u8)]
 pub enum DPVL {
     BodyCrcErrorCount = 0xbc,
     ClientId = 0xbd,
@@ -177,4 +177,46 @@ pub enum DPVL {
     MonitorXOrigin = 0xb9,
     MonitorYOrigin = 0xba,
     PacketCount = 0xb8,
+}
+
+impl From<PresetOperation> for u8 {
+    fn from(code: PresetOperation) -> Self {
+        code.into()
+    }
+}
+
+impl From<ImageAdjustment> for u8 {
+    fn from(code: ImageAdjustment) -> Self {
+        code.into()
+    }
+}
+
+impl From<DisplayControl> for u8 {
+    fn from(code: DisplayControl) -> Self {
+        code.into()
+    }
+}
+
+impl From<Geometry> for u8 {
+    fn from(code: Geometry) -> Self {
+        code.into()
+    }
+}
+
+impl From<Miscellaneous> for u8 {
+    fn from(code: Miscellaneous) -> Self {
+        code.into()
+    }
+}
+
+impl From<Audio> for u8 {
+    fn from(code: Audio) -> Self {
+        code.into()
+    }
+}
+
+impl From<DPVL> for u8 {
+    fn from(code: DPVL) -> Self {
+        code.into()
+    }
 }
