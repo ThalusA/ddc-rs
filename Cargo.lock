@@ -84,7 +84,7 @@ dependencies = [
 
 [[package]]
 name = "ddc-enhanced-rs"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "ddc",
  "ddc-hi",
