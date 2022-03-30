@@ -1,61 +1,52 @@
 mod mccs;
 mod neon_bindings;
 
-use neon_bindings::{get_brightness, set_brightness, get_contrast, set_contrast, list_infos};
+use neon_bindings::{display_new, display_list, display_get_brightness, display_get_contrast, display_set_brightness, display_set_contrast};
 use neon::prelude::*;
 use ddc::{Ddc, FeatureCode, VcpValue};
 use ddc_hi::{DisplayInfo};
 pub use ddc_hi::Display;
-use anyhow::{Error, anyhow};
 
+pub struct EnhancedDisplay(Display);
 
-trait EnhancedDisplay {
-    fn get_value(&mut self, code: FeatureCode, error: Error) -> Result<VcpValue, Error>;
-    fn set_value(&mut self, code: FeatureCode, error: Error, value: u16) -> Result<(), Error>;
+impl Finalize for EnhancedDisplay {}
 
-    fn get(id: String) -> Option<Display>;
-    fn list_infos() -> Vec<DisplayInfo>;
-
-    fn get_brightness(&mut self) -> Result<VcpValue, Error>;
-    fn set_brightness(&mut self, value: u16) -> Result<(), Error>;
-    fn get_contrast(&mut self) -> Result<VcpValue, Error>;
-    fn set_contrast(&mut self, value: u16) -> Result<(), Error>;
-}
-
-impl EnhancedDisplay for Display {
-    fn get_value(&mut self, code: FeatureCode, error: Error) -> Result<VcpValue, Error> {
-        match self.info.mccs_database.get(code) {
+impl EnhancedDisplay {
+    fn get_value(&mut self, code: FeatureCode, error: String) -> Result<VcpValue, String> {
+        match self.0.info.mccs_database.get(code) {
             Some(feature) => {
-                self.handle.get_vcp_feature(feature.code)
+                self.0.handle.get_vcp_feature(feature.code)
+                    .map_err(|error| error.to_string())
             }
             None => Err(error)
         }
     }
 
-    fn set_value(&mut self, code: FeatureCode, error: Error, value: u16) -> Result<(), Error> {
-        match self.info.mccs_database.get(code) {
+    fn set_value(&mut self, code: FeatureCode, error: String, value: u16) -> Result<(), String> {
+        match self.0.info.mccs_database.get(code) {
             Some(feature) => {
-                self.handle.set_vcp_feature(feature.code, value)
+                self.0.handle.set_vcp_feature(feature.code, value)
+                    .map_err(|error| error.to_string())
             }
             None => Err(error)
         }
     }
 
-    fn get(id: String) -> Option<Display> {
+    fn get(id: String) -> Result<EnhancedDisplay, String> {
         for mut display in Display::enumerate() {
             let option = match display.update_capabilities() {
                 Ok(()) => if display.info.id == id {
-                    Option::from(display)
+                    Option::from(EnhancedDisplay(display))
                 } else {
                     Option::None
                 }
                 Err(_) => {Option::None}
             };
             if option.is_some() {
-                return option;
+                return Ok(option.unwrap());
             }
         }
-        Option::None
+        Err("This display doesn't exist".to_string())
     }
 
     fn list_infos() -> Vec<DisplayInfo> {
@@ -69,35 +60,36 @@ impl EnhancedDisplay for Display {
         displays_info
     }
 
-    fn get_brightness(&mut self) -> Result<VcpValue, Error> {
+    fn get_brightness(&mut self) -> Result<VcpValue, String> {
         self.get_value(mccs::ImageAdjustment::Luminance.into(),
-                       anyhow!("This display doesn't support brightness operations"))
+                       "This display doesn't support brightness operations".to_string())
     }
 
-    fn set_brightness(&mut self, value: u16) -> Result<(), Error> {
+    fn set_brightness(&mut self, value: u16) -> Result<(), String> {
         self.set_value(mccs::ImageAdjustment::Luminance.into(),
-                       anyhow!("This display doesn't support brightness operations"),
+                       "This display doesn't support brightness operations".to_string(),
                         value)
     }
 
-    fn get_contrast(&mut self) -> Result<VcpValue, Error> {
+    fn get_contrast(&mut self) -> Result<VcpValue, String> {
         self.get_value(mccs::ImageAdjustment::Contrast.into(),
-                       anyhow!("This display doesn't support contrast operations"))
+                       "This display doesn't support contrast operations".to_string())
     }
 
-    fn set_contrast(&mut self, value: u16) -> Result<(), Error> {
+    fn set_contrast(&mut self, value: u16) -> Result<(), String> {
         self.set_value(mccs::ImageAdjustment::Contrast.into(),
-                       anyhow!("This display doesn't support contrast operations"),
+                       "This display doesn't support contrast operations".to_string(),
                        value)
     }
 }
 
 #[neon::main]
 fn main(mut cx: ModuleContext) -> NeonResult<()> {
-    cx.export_function("get_brightness", get_brightness)?;
-    cx.export_function("set_brightness", set_brightness)?;
-    cx.export_function("get_contrast", get_contrast)?;
-    cx.export_function("set_contrast", set_contrast)?;
-    cx.export_function("list_infos", list_infos)?;
+    cx.export_function("display_new", display_new)?;
+    cx.export_function("display_list", display_list)?;
+    cx.export_function("display_get_brightness", display_get_brightness)?;
+    cx.export_function("display_get_contrast", display_get_contrast)?;
+    cx.export_function("display_set_brightness", display_set_brightness)?;
+    cx.export_function("display_set_contrast", display_set_contrast)?;
     Ok(())
 }

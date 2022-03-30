@@ -86,7 +86,6 @@ dependencies = [
 name = "ddc-enhanced-rs"
 version = "0.1.0"
 dependencies = [
- "anyhow",
  "ddc",
  "ddc-hi",
  "neon",

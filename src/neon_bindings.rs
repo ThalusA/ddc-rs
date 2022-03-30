@@ -1,109 +1,118 @@
-use ddc_hi::{Display};
+use std::cell::RefCell;
+use ddc_hi::DisplayInfo;
 use neon::prelude::*;
 use crate::EnhancedDisplay;
 
-pub fn list_infos(mut cx: FunctionContext) -> JsResult<JsArray> {
-    let displays_info = Display::list_infos();
-    let infos = cx.empty_array();
-    let mut index = 0;
-    for display_info in displays_info {
+type BoxedEnhancedDisplay = JsBox<RefCell<EnhancedDisplay>>;
+
+trait StructToObject {
+    fn to_object<'a>(&self, cx: &mut impl Context<'a>) -> JsResult<'a, JsObject>;
+}
+
+impl StructToObject for DisplayInfo {
+    fn to_object<'a>(&self, cx: &mut impl Context<'a>) -> JsResult<'a, JsObject> {
         let obj = cx.empty_object();
-        let id = cx.string(display_info.id);
-        obj.set(&mut cx, "id", id)?;
-        if display_info.serial_number.is_some() {
-            let serial_number = cx.string(display_info.serial_number.as_ref().unwrap());
-            obj.set(&mut cx, "serial_number", serial_number)?;
-        }
-        if display_info.model_name.is_some() {
-            let model_name = cx.string(display_info.model_name.as_ref().unwrap());
-            obj.set(&mut cx, "model_name", model_name)?;
-        }
-        if (&display_info.manufacturer_id).is_some() {
-            let manufacturer_id = cx.string(display_info.manufacturer_id.as_ref().unwrap());
-            obj.set(&mut cx, "manufacturer_id", manufacturer_id)?;
-        }
-        infos.set(&mut cx, index, obj)?;
-        index += 1;
-    }
-    infos.downcast_or_throw(&mut cx)
-}
 
-pub fn get_brightness(mut cx: FunctionContext) -> JsResult<JsArray> {
-    let id: Handle<JsString> = cx.argument(0)?;
-    match Display::get(id.value(&mut cx)) {
-        Some(mut display) => {
-            match display.get_brightness() {
-                Ok(brightness) => {
-                    let tuple = cx.empty_array();
-                    let value = cx.number(brightness.value());
-                    let maximum = cx.number(brightness.maximum());
-                    tuple.set(&mut cx, 0, value)?;
-                    tuple.set(&mut cx, 1, maximum)?;
-                    tuple.downcast_or_throw(&mut cx)
-                },
-                Err(err) => cx.throw_error(err.to_string())
-            }
+        let id = cx.string(self.id.clone());
+        obj.set(cx, "id", id)?;
+
+        match &self.serial_number {
+            Some(serial_number) => {
+                let serial_number = cx.string(serial_number);
+                obj.set(cx, "serial_number", serial_number)?;
+            },
+            None => {}
         }
-        None => {
-            cx.throw_error("This display doesn't exist")
+
+        match &self.model_name {
+            Some(model_name) => {
+                let model_name = cx.string(model_name);
+                obj.set(cx, "model_name", model_name)?;
+            },
+            None => {}
         }
+
+        match &self.manufacturer_id {
+            Some(manufacturer_id) => {
+                let manufacturer_id = cx.string(manufacturer_id);
+                obj.set(cx, "manufacturer_id", manufacturer_id)?;
+            },
+            None => {}
+        }
+
+        Ok(obj)
     }
 }
 
-pub fn set_brightness(mut cx: FunctionContext) -> JsResult<JsUndefined> {
-    let id: Handle<JsString> = cx.argument(0)?;
-    let value: Handle<JsNumber> = cx.argument(1)?;
-    match Display::get(id.value(&mut cx)) {
-        Some(mut display) => {
-            match display.set_brightness(value.value(&mut cx) as u16) {
-                Ok(()) => {
-                    Ok(cx.undefined())
-                },
-                Err(err) => cx.throw_error(err.to_string())
-            }
-        }
-        None => {
-            cx.throw_error("This display doesn't exist")
-        }
-    }
+pub fn display_new(mut cx: FunctionContext) -> JsResult<BoxedEnhancedDisplay> {
+    let id = cx.argument::<JsString>(0)?.value(&mut cx);
+    let display = RefCell::new(EnhancedDisplay::get(id).map_err(|error| cx.error(error).unwrap_err())?);
+
+    Ok(cx.boxed(display))
 }
 
-pub fn get_contrast(mut cx: FunctionContext) -> JsResult<JsArray> {
-    let id: Handle<JsString> = cx.argument(0)?;
-    match Display::get(id.value(&mut cx)) {
-        Some(mut display) => {
-            match display.get_contrast() {
-                Ok(contrast) => {
-                    let tuple = cx.empty_array();
-                    let value = cx.number(contrast.value());
-                    let maximum = cx.number(contrast.maximum());
-                    tuple.set(&mut cx, 0, value)?;
-                    tuple.set(&mut cx, 1, maximum)?;
-                    tuple.downcast_or_throw(&mut cx)
-                },
-                Err(err) => cx.throw_error(err.to_string())
-            }
-        }
-        None => {
-            cx.throw_error("This display doesn't exist")
-        }
+pub fn display_list(mut cx: FunctionContext) -> JsResult<JsArray> {
+    let displays_info = EnhancedDisplay::list_infos();
+    let infos = cx.empty_array();
+
+    for (index, display_info) in displays_info.iter().enumerate() {
+        let new_object = display_info.to_object(&mut cx)?;
+        infos.set(&mut cx, index as u32, new_object)?;
     }
+
+    Ok(infos)
 }
 
-pub fn set_contrast(mut cx: FunctionContext) -> JsResult<JsUndefined> {
-    let id: Handle<JsString> = cx.argument(0)?;
-    let value: Handle<JsNumber> = cx.argument(1)?;
-    match Display::get(id.value(&mut cx)) {
-        Some(mut display) => {
-            match display.set_contrast(value.value(&mut cx) as u16) {
-                Ok(()) => {
-                    Ok(cx.undefined())
-                },
-                Err(err) => cx.throw_error(err.to_string())
-            }
-        }
-        None => {
-            cx.throw_error("This display doesn't exist")
-        }
-    }
+pub fn display_get_brightness(mut cx: FunctionContext) -> JsResult<JsObject> {
+    let display = cx.argument::<BoxedEnhancedDisplay>(0)?;
+    let mut display = display.borrow_mut();
+    let obj = cx.empty_object();
+
+    let brightness = display.get_brightness().map_err(|error| cx.error(error).unwrap_err())?;
+
+    let brightness_value = cx.number(brightness.value());
+    obj.set(&mut cx, "value", brightness_value)?;
+
+    let brightness_maximum = cx.number(brightness.maximum());
+    obj.set(&mut cx, "maximum", brightness_maximum)?;
+
+    Ok(obj)
+}
+
+
+pub fn display_set_brightness(mut cx: FunctionContext) -> JsResult<JsUndefined> {
+    let display = cx.argument::<BoxedEnhancedDisplay>(0)?;
+    let mut display = display.borrow_mut();
+
+    let value = cx.argument::<JsNumber>(1)?.value(&mut cx) as u16;
+    display.set_brightness(value).map_err(|error| cx.error(error).unwrap_err())?;
+
+    Ok(cx.undefined())
+}
+
+pub fn display_get_contrast(mut cx: FunctionContext) -> JsResult<JsObject> {
+    let display = cx.argument::<BoxedEnhancedDisplay>(0)?;
+    let mut display = display.borrow_mut();
+    let obj = cx.empty_object();
+
+    let contrast = display.get_contrast().map_err(|error| cx.error(error).unwrap_err())?;
+
+    let contrast_value = cx.number(contrast.value());
+    obj.set(&mut cx, "value", contrast_value)?;
+
+    let contrast_maximum = cx.number(contrast.maximum());
+    obj.set(&mut cx, "maximum", contrast_maximum)?;
+
+    Ok(obj)
+}
+
+
+pub fn display_set_contrast(mut cx: FunctionContext) -> JsResult<JsUndefined> {
+    let display = cx.argument::<BoxedEnhancedDisplay>(0)?;
+    let mut display = display.borrow_mut();
+
+    let value = cx.argument::<JsNumber>(1)?.value(&mut cx) as u16;
+    display.set_contrast(value).map_err(|error| cx.error(error).unwrap_err())?;
+
+    Ok(cx.undefined())
 }

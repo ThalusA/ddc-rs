@@ -10,6 +10,5 @@ crate-type = ["cdylib"]
 
 [dependencies]
 ddc = "0.2.2"
-anyhow = "1.0.56"
 ddc-hi = "0.4.1"
 neon = {version = "0.10.0", default-features=false, features=["napi-latest"]}
