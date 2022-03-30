@@ -1,6 +1,6 @@
 # ddc-enhanced-rs
 
-`ddc-enhanced-rs` is a cross platform Rust crate and a Node package for controlling monitors with [DDC/CI](https://en.wikipedia.org/wiki/Display_Data_Channel).
+`ddc-enhanced-rs` is a cross platform Rust crate and Node package for controlling monitors with [DDC/CI](https://en.wikipedia.org/wiki/Display_Data_Channel).
 
 ## Documentation
 
