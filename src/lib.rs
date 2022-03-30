@@ -1,18 +1,23 @@
-mod mccs;
-mod neon_bindings;
+pub mod mccs;
 
+#[cfg(feature = "node-bindings")]
+mod neon_bindings;
+#[cfg(feature = "node-bindings")]
 use neon_bindings::{display_new, display_list, display_get_brightness, display_get_contrast, display_set_brightness, display_set_contrast};
+#[cfg(feature = "node-bindings")]
 use neon::prelude::*;
+
 use ddc::{Ddc, FeatureCode, VcpValue};
 use ddc_hi::{DisplayInfo};
-pub use ddc_hi::Display;
+use ddc_hi::Display;
 
 pub struct EnhancedDisplay(Display);
 
+#[cfg(feature = "node-bindings")]
 impl Finalize for EnhancedDisplay {}
 
 impl EnhancedDisplay {
-    fn get_value(&mut self, code: FeatureCode, error: String) -> Result<VcpValue, String> {
+    pub fn get_value(&mut self, code: FeatureCode, error: String) -> Result<VcpValue, String> {
         match self.0.info.mccs_database.get(code) {
             Some(feature) => {
                 self.0.handle.get_vcp_feature(feature.code)
@@ -22,7 +27,7 @@ impl EnhancedDisplay {
         }
     }
 
-    fn set_value(&mut self, code: FeatureCode, error: String, value: u16) -> Result<(), String> {
+    pub fn set_value(&mut self, code: FeatureCode, error: String, value: u16) -> Result<(), String> {
         match self.0.info.mccs_database.get(code) {
             Some(feature) => {
                 self.0.handle.set_vcp_feature(feature.code, value)
@@ -32,7 +37,7 @@ impl EnhancedDisplay {
         }
     }
 
-    fn get(id: String) -> Result<EnhancedDisplay, String> {
+    pub fn get(id: String) -> Result<EnhancedDisplay, String> {
         for mut display in Display::enumerate() {
             let option = match display.update_capabilities() {
                 Ok(()) => if display.info.id == id {
@@ -49,7 +54,7 @@ impl EnhancedDisplay {
         Err("This display doesn't exist".to_string())
     }
 
-    fn list_infos() -> Vec<DisplayInfo> {
+    pub fn list_infos() -> Vec<DisplayInfo> {
         let mut displays_info = vec![];
         for mut display in Display::enumerate() {
             match display.update_capabilities() {
@@ -60,29 +65,30 @@ impl EnhancedDisplay {
         displays_info
     }
 
-    fn get_brightness(&mut self) -> Result<VcpValue, String> {
+    pub fn get_brightness(&mut self) -> Result<VcpValue, String> {
         self.get_value(mccs::ImageAdjustment::Luminance.into(),
                        "This display doesn't support brightness operations".to_string())
     }
 
-    fn set_brightness(&mut self, value: u16) -> Result<(), String> {
+    pub fn set_brightness(&mut self, value: u16) -> Result<(), String> {
         self.set_value(mccs::ImageAdjustment::Luminance.into(),
                        "This display doesn't support brightness operations".to_string(),
                         value)
     }
 
-    fn get_contrast(&mut self) -> Result<VcpValue, String> {
+    pub fn get_contrast(&mut self) -> Result<VcpValue, String> {
         self.get_value(mccs::ImageAdjustment::Contrast.into(),
                        "This display doesn't support contrast operations".to_string())
     }
 
-    fn set_contrast(&mut self, value: u16) -> Result<(), String> {
+    pub fn set_contrast(&mut self, value: u16) -> Result<(), String> {
         self.set_value(mccs::ImageAdjustment::Contrast.into(),
                        "This display doesn't support contrast operations".to_string(),
                        value)
     }
 }
 
+#[cfg(feature = "node-bindings")]
 #[neon::main]
 fn main(mut cx: ModuleContext) -> NeonResult<()> {
     cx.export_function("display_new", display_new)?;

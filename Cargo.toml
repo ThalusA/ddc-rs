@@ -5,10 +5,15 @@ edition = "2021"
 license = "MIT"
 exclude = ["index.node"]
 
+
+[features]
+default = []
+node-bindings = ["neon"]
+
 [lib]
 crate-type = ["cdylib"]
 
 [dependencies]
 ddc = "0.2.2"
 ddc-hi = "0.4.1"
-neon = {version = "0.10.0", default-features=false, features=["napi-latest"]}
+neon = { version = "0.10.0", default-features = false, features = ["napi-latest"], optional = true }

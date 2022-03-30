@@ -46,7 +46,7 @@ impl StructToObject for DisplayInfo {
 
 pub fn display_new(mut cx: FunctionContext) -> JsResult<BoxedEnhancedDisplay> {
     let id = cx.argument::<JsString>(0)?.value(&mut cx);
-    let display = RefCell::new(EnhancedDisplay::get(id).map_err(|error| cx.error(error).unwrap_err())?);
+    let display = RefCell::new(EnhancedDisplay::get(id).or_else(|error| cx.throw_error(error))?);
 
     Ok(cx.boxed(display))
 }
@@ -68,7 +68,7 @@ pub fn display_get_brightness(mut cx: FunctionContext) -> JsResult<JsObject> {
     let mut display = display.borrow_mut();
     let obj = cx.empty_object();
 
-    let brightness = display.get_brightness().map_err(|error| cx.error(error).unwrap_err())?;
+    let brightness = display.get_brightness().or_else(|error| cx.throw_error(error))?;
 
     let brightness_value = cx.number(brightness.value());
     obj.set(&mut cx, "value", brightness_value)?;
@@ -85,7 +85,7 @@ pub fn display_set_brightness(mut cx: FunctionContext) -> JsResult<JsUndefined> 
     let mut display = display.borrow_mut();
 
     let value = cx.argument::<JsNumber>(1)?.value(&mut cx) as u16;
-    display.set_brightness(value).map_err(|error| cx.error(error).unwrap_err())?;
+    display.set_brightness(value).or_else(|error| cx.throw_error(error))?;
 
     Ok(cx.undefined())
 }
@@ -95,7 +95,7 @@ pub fn display_get_contrast(mut cx: FunctionContext) -> JsResult<JsObject> {
     let mut display = display.borrow_mut();
     let obj = cx.empty_object();
 
-    let contrast = display.get_contrast().map_err(|error| cx.error(error).unwrap_err())?;
+    let contrast = display.get_contrast().or_else(|error| cx.throw_error(error))?;
 
     let contrast_value = cx.number(contrast.value());
     obj.set(&mut cx, "value", contrast_value)?;
@@ -112,7 +112,7 @@ pub fn display_set_contrast(mut cx: FunctionContext) -> JsResult<JsUndefined> {
     let mut display = display.borrow_mut();
 
     let value = cx.argument::<JsNumber>(1)?.value(&mut cx) as u16;
-    display.set_contrast(value).map_err(|error| cx.error(error).unwrap_err())?;
+    display.set_contrast(value).or_else(|error| cx.throw_error(error))?;
 
     Ok(cx.undefined())
 }

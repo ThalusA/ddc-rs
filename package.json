@@ -1,11 +1,11 @@
 {
   "name": "ddc-enhanced-rs",
   "version": "0.1.0",
-  "description": "DDC/CI",
-  "main": "index.node",
+  "description": "DDC/CI cross-platform nodejs wrapper",
+  "main": "index.js",
+  "type": "module",
   "scripts": {
-    "build": "cargo-cp-artifact -nc index.node -- cargo build --message-format=json-render-diagnostics",
-    "install": "npm run build",
+    "build": "cargo-cp-artifact -nc index.node -- cargo build --features node-bindings --message-format=json-render-diagnostics",
     "test": "cargo test"
   },
   "license": "MIT",
