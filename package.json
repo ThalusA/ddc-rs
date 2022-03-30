@@ -1,23 +1,34 @@
 {
   "name": "ddc-enhanced-rs",
   "version": "0.1.0",
-  "description": "DDC/CI cross-platform nodejs wrapper",
+  "author": "Alexandre MONIER <alexandre.monierc@gmail.com>",
+  "description": "DDC/CI high level library for NodeJS (cross platform)",
   "main": "index.js",
+  "files": [
+    "index.d.ts",
+    "src",
+    "Cargo.toml"
+  ],
   "type": "module",
   "scripts": {
     "build": "cargo-cp-artifact -nc index.node -- cargo build --features node-bindings --message-format=json-render-diagnostics",
+    "install": "cargo-cp-artifact -nc index.node -- cargo build --features node-bindings --message-format=json-render-diagnostics",
     "test": "cargo test"
   },
   "license": "MIT",
-  "devDependencies": {
+  "dependencies": {
     "cargo-cp-artifact": "^0.1"
   },
+  "os": [
+    "linux",
+    "darwin",
+    "win32"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ThalusA/ddc-enhanced-rs.git"
   },
   "keywords": [
-    "Neon",
     "DDC/CI",
     "DDC"
   ],
