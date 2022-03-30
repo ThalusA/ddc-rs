@@ -10,6 +10,7 @@ NodeJS: https://github.com/ThalusA/ddc-enhanced-rs/blob/master/index.d.ts
 
 ## Examples
 
+### Rust
 ```rust
 use ddc_enhanced_rs::EnhancedDisplay;
 
@@ -22,6 +23,7 @@ fn main() {
 }
 ```
 
+### NodeJS
 ```javascript
 import Display from "ddc-enhanced-rs";
 
