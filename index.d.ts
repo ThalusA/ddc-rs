@@ -1,9 +1,9 @@
-interface DisplayValue {
+export interface DisplayValue {
     value: number;
     maximum: number;
 }
 
-interface DisplayInfo {
+export interface DisplayInfo {
     id: string;
     serial_number?: string;
     model_name?: string;
