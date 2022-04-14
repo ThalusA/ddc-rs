@@ -1,6 +1,6 @@
 {
   "name": "ddc-enhanced-rs",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "author": "Alexandre MONIER <alexandre.monierc@gmail.com>",
   "description": "DDC/CI high level library for NodeJS (cross platform)",
   "main": "index.js",
@@ -9,10 +9,9 @@
     "src",
     "Cargo.toml"
   ],
-  "type": "module",
   "scripts": {
-    "build": "cargo-cp-artifact -nc index.node -- cargo build --features node-bindings --message-format=json-render-diagnostics",
-    "install": "cargo-cp-artifact -nc index.node -- cargo build --features node-bindings --message-format=json-render-diagnostics",
+    "build": "cargo-cp-artifact -nc ddc_enhanced_rs.node -- cargo build --features node-bindings --message-format=json-render-diagnostics",
+    "install": "cargo-cp-artifact -nc ddc_enhanced_rs.node -- cargo build --features node-bindings --message-format=json-render-diagnostics",
     "test": "cargo test"
   },
   "license": "MIT",

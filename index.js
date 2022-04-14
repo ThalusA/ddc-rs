@@ -1,9 +1,9 @@
-import {
+const {
     display_new, display_list, display_get_brightness,
     display_get_contrast, display_set_brightness, display_set_contrast
-} from ".";
+} = require("./ddc_enhanced_rs");
 
-export default class Display {
+class Display {
     constructor(id) {
         this.display = display_new(id)
     }
@@ -28,3 +28,5 @@ export default class Display {
         return display_list();
     }
 }
+
+module.exports = Display;
