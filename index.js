@@ -1,5 +1,7 @@
-const { display_new, display_list, display_get_brightness,
-        display_get_contrast, display_set_brightness, display_set_contrast } = require(".");
+import {
+    display_new, display_list, display_get_brightness,
+    display_get_contrast, display_set_brightness, display_set_contrast
+} from ".";
 
 export default class Display {
     constructor(id) {

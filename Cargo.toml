@@ -1,8 +1,7 @@
 [package]
 name = "ddc-enhanced-rs"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Alexandre MONIER <alexandre.monierc@gmail.com>"]
-rust-version = "1.58.1"
 description = "DDC/CI high level library for Rust (cross platform)"
 documentation = "https://docs.rs/ddc-enhanced-rs"
 homepage = "https://github.com/ThalusA/ddc-enhanced-rs#readme"
