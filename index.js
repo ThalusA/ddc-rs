@@ -1,7 +1,7 @@
 const {
     display_new, display_list, display_get_brightness,
     display_get_contrast, display_set_brightness, display_set_contrast
-} = require("./ddc_enhanced_rs");
+} = require("./ddc_enhanced_rs.node");
 
 class Display {
     constructor(id) {
