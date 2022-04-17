@@ -39,7 +39,7 @@ thread_local! {
 
 pub fn get_brightness(uuid: String) -> Result<VcpValue, Error> {
     ENHANCED_DISPLAYS.with(|enhanced_displays| {
-        enhanced_displays.take().iter_mut().find(|enhanced_display|
+        (*enhanced_displays.borrow_mut()).iter_mut().find(|enhanced_display|
             enhanced_display.uuid == uuid).map(|enhanced_display|
             match enhanced_display.inner_display.info.mccs_database.get(mccs::ImageAdjustment::Luminance.into()) {
                 Some(feature) => {
@@ -53,7 +53,7 @@ pub fn get_brightness(uuid: String) -> Result<VcpValue, Error> {
 
 pub fn set_brightness(uuid: String, value: u16) -> Result<(), Error> {
     ENHANCED_DISPLAYS.with(|enhanced_displays| {
-        enhanced_displays.take().iter_mut().find(|enhanced_display|
+        (*enhanced_displays.borrow_mut()).iter_mut().find(|enhanced_display|
             enhanced_display.uuid == uuid).map(|enhanced_display|
             match enhanced_display.inner_display.info.mccs_database.get(mccs::ImageAdjustment::Luminance.into()) {
                 Some(feature) => {
