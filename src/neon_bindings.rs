@@ -13,7 +13,7 @@ impl StructToObject for EnhancedDisplay {
         let id = cx.string(self.inner_display.info.id.clone());
         obj.set(cx, "id", id)?;
 
-        let id = cx.string(self.uuid.to_simple().to_string());
+        let id = cx.string(self.uuid.clone());
         obj.set(cx, "uuid", id)?;
 
         match &self.inner_display.info.serial_number {

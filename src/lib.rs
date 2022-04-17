@@ -18,7 +18,7 @@ use uuid::Uuid;
 
 pub struct EnhancedDisplay {
     pub inner_display: Display,
-    pub uuid: Uuid
+    pub uuid: String
 }
 
 #[cfg(feature = "node-bindings")]
@@ -28,7 +28,10 @@ thread_local! {
     pub static ENHANCED_DISPLAYS: RefCell<Vec<EnhancedDisplay>> = RefCell::new(
         Display::enumerate().into_iter().map(|mut display|
             match display.update_capabilities() {
-                Ok(()) => Ok(EnhancedDisplay { inner_display: display, uuid: Uuid::new_v4() }),
+                Ok(()) => Ok(EnhancedDisplay {
+                    inner_display: display,
+                    uuid: Uuid::new_v4().to_simple().to_string()
+                }),
                 Err(err) => Err(Error::new(ErrorKind::TimedOut, err.to_string()))
             }
         ).filter_map(|display| display.ok()).collect());
@@ -36,11 +39,9 @@ thread_local! {
 
 
 pub fn get_brightness(uuid: String) -> Result<VcpValue, Error> {
-    let parsed_uuid = Uuid::parse_str(uuid.borrow()).map_err(|err|
-        Error::new(ErrorKind::InvalidInput , err.to_string()))?;
     ENHANCED_DISPLAYS.with(|enhanced_displays| {
         enhanced_displays.take().iter_mut().find(|enhanced_display|
-            enhanced_display.uuid == parsed_uuid).map(|enhanced_display|
+            enhanced_display.uuid == uuid).map(|enhanced_display|
             match enhanced_display.inner_display.info.mccs_database.get(mccs::ImageAdjustment::Luminance.into()) {
                 Some(feature) => {
                     enhanced_display.inner_display.handle.get_vcp_feature(feature.code)
@@ -52,11 +53,9 @@ pub fn get_brightness(uuid: String) -> Result<VcpValue, Error> {
 }
 
 pub fn set_brightness(uuid: String, value: u16) -> Result<(), Error> {
-    let parsed_uuid = Uuid::parse_str(uuid.borrow()).map_err(|err|
-        Error::new(ErrorKind::InvalidInput , err.to_string()))?;
     ENHANCED_DISPLAYS.with(|enhanced_displays| {
         enhanced_displays.take().iter_mut().find(|enhanced_display|
-            enhanced_display.uuid == parsed_uuid).map(|enhanced_display|
+            enhanced_display.uuid == uuid).map(|enhanced_display|
             match enhanced_display.inner_display.info.mccs_database.get(mccs::ImageAdjustment::Luminance.into()) {
                 Some(feature) => {
                     enhanced_display.inner_display.handle.set_vcp_feature(feature.code, value)
