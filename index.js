@@ -3,16 +3,16 @@ const {
 } = require("./ddc_enhanced_rs.node");
 
 class Display {
-    constructor(id) {
-        this.display_id = id
+    constructor(uuid) {
+        this.display_uuid = uuid
     }
 
     get_brightness() {
-        return display_get_brightness(this.display_id);
+        return display_get_brightness(this.display_uuid);
     }
 
     set_brightness(value) {
-        return display_set_brightness(this.display_id, value);
+        return display_set_brightness(this.display_uuid, value);
     }
 
     static info() {

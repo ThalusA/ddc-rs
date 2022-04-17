@@ -13,6 +13,9 @@ impl StructToObject for EnhancedDisplay {
         let id = cx.string(self.inner_display.info.id.clone());
         obj.set(cx, "id", id)?;
 
+        let id = cx.string(self.uuid.to_simple().to_string());
+        obj.set(cx, "uuid", id)?;
+
         match &self.inner_display.info.serial_number {
             Some(serial_number) => {
                 let serial_number = cx.string(serial_number);
@@ -67,10 +70,10 @@ pub fn display_info(mut cx: FunctionContext) -> JsResult<JsArray> {
 }
 
 pub fn display_get_brightness(mut cx: FunctionContext) -> JsResult<JsObject> {
-    let display_id = cx.argument::<JsString>(0)?.value(&mut cx);
+    let display_uuid = cx.argument::<JsString>(0)?.value(&mut cx);
     let obj = cx.empty_object();
 
-    let brightness = get_brightness(display_id)
+    let brightness = get_brightness(display_uuid)
         .or_else(|error| cx.throw_error(error.to_string()))?;
 
     let brightness_value = cx.number(brightness.value());
@@ -84,10 +87,10 @@ pub fn display_get_brightness(mut cx: FunctionContext) -> JsResult<JsObject> {
 
 
 pub fn display_set_brightness(mut cx: FunctionContext) -> JsResult<JsUndefined> {
-    let display_id = cx.argument::<JsString>(0)?.value(&mut cx);
+    let display_uuid = cx.argument::<JsString>(0)?.value(&mut cx);
     let value = cx.argument::<JsNumber>(1)?.value(&mut cx) as u16;
 
-    set_brightness(display_id, value)
+    set_brightness(display_uuid, value)
         .or_else(|error| cx.throw_error(error.to_string()))?;
 
     Ok(cx.undefined())
