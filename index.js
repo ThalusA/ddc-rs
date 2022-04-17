@@ -1,31 +1,22 @@
 const {
-    display_new, display_list, display_get_brightness,
-    display_get_contrast, display_set_brightness, display_set_contrast
+    display_info, display_get_brightness, display_set_brightness
 } = require("./ddc_enhanced_rs.node");
 
 class Display {
     constructor(id) {
-        this.display = display_new(id)
+        this.display_id = id
     }
 
-    get brightness() {
-        return display_get_brightness(this.display);
-    }
-
-    get contrast() {
-        return display_get_contrast(this.display);
+    get_brightness() {
+        return display_get_brightness(this.display_id);
     }
 
     set_brightness(value) {
-        display_set_brightness(this.display, value);
+        return display_set_brightness(this.display_id, value);
     }
 
-    set_contrast(value) {
-        display_set_contrast(this.display, value);
-    }
-
-    static list() {
-        return display_list();
+    static info() {
+        return display_info();
     }
 }
 

@@ -1,101 +1,70 @@
 pub mod mccs;
 
+use std::io::{Error, ErrorKind};
+use std::cell::RefCell;
+
 #[cfg(feature = "node-bindings")]
 mod neon_bindings;
+
 #[cfg(feature = "node-bindings")]
-use neon_bindings::{display_new, display_list, display_get_brightness, display_get_contrast, display_set_brightness, display_set_contrast};
+use neon_bindings::{display_get_brightness, display_set_brightness, display_info};
 #[cfg(feature = "node-bindings")]
 use neon::prelude::*;
 
-use ddc::{Ddc, FeatureCode, VcpValue};
-use ddc_hi::{DisplayInfo};
+use ddc::{Ddc, VcpValue};
 use ddc_hi::Display;
 
-pub struct EnhancedDisplay(Display);
+pub struct EnhancedDisplay {
+    pub inner_display: Display,
+}
 
 #[cfg(feature = "node-bindings")]
 impl Finalize for EnhancedDisplay {}
 
-impl EnhancedDisplay {
-    pub fn get_value(&mut self, code: FeatureCode, error: String) -> Result<VcpValue, String> {
-        match self.0.info.mccs_database.get(code) {
-            Some(feature) => {
-                self.0.handle.get_vcp_feature(feature.code)
-                    .map_err(|error| error.to_string())
-            }
-            None => Err(error)
-        }
-    }
-
-    pub fn set_value(&mut self, code: FeatureCode, error: String, value: u16) -> Result<(), String> {
-        match self.0.info.mccs_database.get(code) {
-            Some(feature) => {
-                self.0.handle.set_vcp_feature(feature.code, value)
-                    .map_err(|error| error.to_string())
-            }
-            None => Err(error)
-        }
-    }
-
-    pub fn get(id: String) -> Result<EnhancedDisplay, String> {
-        for mut display in Display::enumerate() {
-            let option = match display.update_capabilities() {
-                Ok(()) => if display.info.id == id {
-                    Option::from(EnhancedDisplay(display))
-                } else {
-                    Option::None
-                }
-                Err(_) => {Option::None}
-            };
-            if option.is_some() {
-                return Ok(option.unwrap());
-            }
-        }
-        Err("This display doesn't exist".to_string())
-    }
-
-    pub fn list_infos() -> Vec<DisplayInfo> {
-        let mut displays_info = vec![];
-        for mut display in Display::enumerate() {
+thread_local! {
+    pub static ENHANCED_DISPLAYS: RefCell<Vec<EnhancedDisplay>> = RefCell::new(
+        Display::enumerate().into_iter().map(|mut display|
             match display.update_capabilities() {
-                Ok(()) => displays_info.push(display.info),
-                Err(_) => {}
-            };
-        }
-        displays_info
-    }
+                Ok(()) => Ok(EnhancedDisplay { inner_display: display }),
+                Err(err) => Err(Error::new(ErrorKind::TimedOut, err.to_string()))
+            }
+        ).filter_map(|display| display.ok()).collect());
+}
 
-    pub fn get_brightness(&mut self) -> Result<VcpValue, String> {
-        self.get_value(mccs::ImageAdjustment::Luminance.into(),
-                       "This display doesn't support brightness operations".to_string())
-    }
 
-    pub fn set_brightness(&mut self, value: u16) -> Result<(), String> {
-        self.set_value(mccs::ImageAdjustment::Luminance.into(),
-                       "This display doesn't support brightness operations".to_string(),
-                        value)
-    }
+pub fn get_brightness(id: String) -> Result<VcpValue, Error> {
+    ENHANCED_DISPLAYS.with(|enhanced_displays| {
+        enhanced_displays.take().iter_mut().find(|enhanced_display|
+            enhanced_display.inner_display.info.id == id).map(|enhanced_display|
+            match enhanced_display.inner_display.info.mccs_database.get(mccs::ImageAdjustment::Luminance.into()) {
+                Some(feature) => {
+                    enhanced_display.inner_display.handle.get_vcp_feature(feature.code)
+                        .map_err(|error| Error::new(ErrorKind::TimedOut, error.to_string()))
+                }
+                None => Err(Error::new(ErrorKind::Unsupported, "This display doesn't support brightness operations"))
+            }).unwrap_or(Err(Error::new(ErrorKind::Unsupported, format!("There is no display with id: {}", id))))
+    })
+}
 
-    pub fn get_contrast(&mut self) -> Result<VcpValue, String> {
-        self.get_value(mccs::ImageAdjustment::Contrast.into(),
-                       "This display doesn't support contrast operations".to_string())
-    }
-
-    pub fn set_contrast(&mut self, value: u16) -> Result<(), String> {
-        self.set_value(mccs::ImageAdjustment::Contrast.into(),
-                       "This display doesn't support contrast operations".to_string(),
-                       value)
-    }
+pub fn set_brightness(id: String, value: u16) -> Result<(), Error> {
+    ENHANCED_DISPLAYS.with(|enhanced_displays| {
+        enhanced_displays.take().iter_mut().find(|enhanced_display|
+            enhanced_display.inner_display.info.id == id).map(|enhanced_display|
+            match enhanced_display.inner_display.info.mccs_database.get(mccs::ImageAdjustment::Luminance.into()) {
+                Some(feature) => {
+                    enhanced_display.inner_display.handle.set_vcp_feature(feature.code, value)
+                        .map_err(|error| Error::new(ErrorKind::TimedOut, error.to_string()))
+                }
+                None => Err(Error::new(ErrorKind::Unsupported, "This display doesn't support brightness operations"))
+            }).unwrap_or(Err(Error::new(ErrorKind::Unsupported, format!("There is no display with id: {}", id))))
+    })
 }
 
 #[cfg(feature = "node-bindings")]
 #[neon::main]
 fn main(mut cx: ModuleContext) -> NeonResult<()> {
-    cx.export_function("display_new", display_new)?;
-    cx.export_function("display_list", display_list)?;
+    cx.export_function("display_info", display_info)?;
     cx.export_function("display_get_brightness", display_get_brightness)?;
-    cx.export_function("display_get_contrast", display_get_contrast)?;
     cx.export_function("display_set_brightness", display_set_brightness)?;
-    cx.export_function("display_set_contrast", display_set_contrast)?;
     Ok(())
 }

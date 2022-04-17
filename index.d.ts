@@ -7,17 +7,15 @@ export interface DisplayInfo {
     id: string;
     serial_number?: string;
     model_name?: string;
+    model_id?: number;
     manufacturer_id?: string;
 }
 
 export default class Display {
     constructor(id: string);
 
-    get brightness(): DisplayValue;
-    get contrast(): DisplayValue;
-
+    get_brightness(): DisplayValue;
     set_brightness(value: number);
-    set_contrast(value: number);
 
-    static list(): Array<DisplayInfo>;
+    static info(): Array<DisplayInfo>;
 }
