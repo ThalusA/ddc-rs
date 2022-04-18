@@ -2,7 +2,6 @@ pub mod mccs;
 
 use std::io::{Error, ErrorKind};
 use std::cell::RefCell;
-use std::fmt;
 
 #[cfg(feature = "node-bindings")]
 mod neon_bindings;
@@ -19,14 +18,6 @@ use uuid::Uuid;
 pub struct EnhancedDisplay {
     pub inner_display: Display,
     pub uuid: String
-}
-
-impl fmt::Debug for EnhancedDisplay {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("EnhancedDisplay")
-            .field("uuid", &self.uuid)
-            .finish()
-    }
 }
 
 #[cfg(feature = "node-bindings")]
@@ -49,7 +40,6 @@ thread_local! {
 pub fn get_brightness(uuid: String) -> Result<VcpValue, Error> {
     ENHANCED_DISPLAYS.with(|enhanced_displays| {
         let mut enhanced_displays = enhanced_displays.borrow_mut();
-        println!("{:?}", *enhanced_displays);
         enhanced_displays.iter_mut().find(|enhanced_display|
             enhanced_display.uuid == uuid).map(|enhanced_display|
             match enhanced_display.inner_display.info.mccs_database.get(mccs::ImageAdjustment::Luminance.into()) {
@@ -65,7 +55,6 @@ pub fn get_brightness(uuid: String) -> Result<VcpValue, Error> {
 pub fn set_brightness(uuid: String, value: u16) -> Result<(), Error> {
     ENHANCED_DISPLAYS.with(|enhanced_displays| {
         let mut enhanced_displays = enhanced_displays.borrow_mut();
-        println!("{:?}", *enhanced_displays);
         enhanced_displays.iter_mut().find(|enhanced_display|
             enhanced_display.uuid == uuid).map(|enhanced_display|
             match enhanced_display.inner_display.info.mccs_database.get(mccs::ImageAdjustment::Luminance.into()) {
