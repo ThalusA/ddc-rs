@@ -1,6 +1,5 @@
 use neon::prelude::*;
-use crate::{get_brightness, set_brightness, EnhancedDisplay,
-            get_enhanced_displays, get_enhanced_display_by_id};
+use crate::{get_brightness, set_brightness, EnhancedDisplay, get_enhanced_displays};
 
 
 trait StructToObject {
@@ -63,14 +62,6 @@ pub fn display_info(mut cx: FunctionContext) -> JsResult<JsArray> {
         }
     });
     Ok(array)
-}
-
-pub fn display_get_by_id(mut cx: FunctionContext) -> JsResult<JsObject> {
-    let id = cx.argument::<JsNumber>(0)?.value(&mut cx) as usize;
-    let display = get_enhanced_display_by_id(id)
-        .or_else(|error| cx.throw_error(error.to_string()))?;
-    let obj = display.to_object(&mut cx)?;
-    Ok(obj)
 }
 
 pub fn display_get_brightness(mut cx: FunctionContext) -> JsResult<JsObject> {
