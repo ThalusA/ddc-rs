@@ -1,6 +1,6 @@
 {
   "name": "ddc-enhanced-rs",
-  "version": "1.0.6",
+  "version": "1.1.0",
   "author": "Alexandre MONIER <alexandre.monierc@gmail.com>",
   "description": "DDC/CI high level library for NodeJS (cross platform)",
   "main": "index.js",

@@ -4,8 +4,8 @@ export interface DisplayValue {
 }
 
 export interface DisplayInfo {
-    id: string;
-    uuid: string;
+    display_id: string;
+    id: number;
     serial_number?: string;
     model_name?: string;
     model_id?: number;
@@ -13,7 +13,7 @@ export interface DisplayInfo {
 }
 
 export default class Display {
-    constructor(uuid: string);
+    constructor(id: number);
 
     get_brightness(): DisplayValue;
     set_brightness(value: number);

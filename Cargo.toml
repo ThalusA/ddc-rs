@@ -1,6 +1,6 @@
 [package]
 name = "ddc-enhanced-rs"
-version = "1.0.6"
+version = "1.1.0"
 authors = ["Alexandre MONIER <alexandre.monierc@gmail.com>"]
 description = "DDC/CI high level library for Rust (cross platform)"
 documentation = "https://docs.rs/ddc-enhanced-rs"
@@ -24,5 +24,3 @@ crate-type = ["lib", "cdylib"]
 ddc = "0.2.2"
 ddc-hi = "0.4.1"
 neon = { version = "0.10.0", default-features = false, features = ["napi-latest"], optional = true }
-once_cell = "1.10.0"
-uuid = { version = "0.8.2", features = ["v4"] }
