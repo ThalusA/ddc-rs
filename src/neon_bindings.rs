@@ -56,7 +56,7 @@ impl StructToObject for EnhancedDisplay {
 pub fn display_info(mut cx: FunctionContext) -> JsResult<JsArray> {
     let array = cx.empty_array();
 
-    get_enhanced_displays().into_iter().enumerate().for_each(|(index, display)| {
+    get_enhanced_displays().enumerate().for_each(|(index, display)| {
         let obj = display.to_object(&mut cx);
         if obj.is_ok() {
             let _ = array.set(&mut cx, index as u32, obj.unwrap());

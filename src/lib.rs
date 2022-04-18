@@ -22,7 +22,7 @@ pub struct EnhancedDisplay {
 #[cfg(feature = "node-bindings")]
 impl Finalize for EnhancedDisplay {}
 
-pub fn get_enhanced_displays() -> Vec<EnhancedDisplay> {
+pub fn get_enhanced_displays() -> impl Iterator<Item = EnhancedDisplay> {
     Display::enumerate().into_iter().enumerate().map(|(id, mut display)|
         match display.update_capabilities() {
             Ok(()) => Ok(EnhancedDisplay {
@@ -31,11 +31,11 @@ pub fn get_enhanced_displays() -> Vec<EnhancedDisplay> {
             }),
             Err(err) => Err(Error::new(ErrorKind::TimedOut, err.to_string()))
         }
-    ).filter_map(|display| display.ok()).collect()
+    ).filter_map(|display| display.ok())
 }
 
 pub fn get_enhanced_display_by_id(id: usize) -> Result<EnhancedDisplay, Error> {
-    get_enhanced_displays().into_iter().find(|enhanced_display| enhanced_display.id == id)
+    get_enhanced_displays().find(|enhanced_display| enhanced_display.id == id)
         .ok_or(Error::new(ErrorKind::Unsupported, format!("There is no display with id: {}", id)))
 }
 
