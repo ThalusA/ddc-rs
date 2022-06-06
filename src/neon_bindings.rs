@@ -1,3 +1,4 @@
+use ddc_hi::Query;
 use neon::prelude::*;
 use crate::{get_brightness, set_brightness, EnhancedDisplay, get_enhanced_displays};
 
@@ -20,7 +21,7 @@ impl StructToObject for EnhancedDisplay {
             Some(serial_number) => {
                 let serial_number = cx.string(serial_number);
                 obj.set(cx, "serial_number", serial_number)?;
-            },
+            }
             None => {}
         }
 
@@ -28,7 +29,7 @@ impl StructToObject for EnhancedDisplay {
             Some(model_name) => {
                 let model_name = cx.string(model_name);
                 obj.set(cx, "model_name", model_name)?;
-            },
+            }
             None => {}
         }
 
@@ -36,7 +37,7 @@ impl StructToObject for EnhancedDisplay {
             Some(model_id) => {
                 let model_id = cx.string(model_id.to_string());
                 obj.set(cx, "model_id", model_id)?;
-            },
+            }
             None => {}
         }
 
@@ -44,7 +45,7 @@ impl StructToObject for EnhancedDisplay {
             Some(manufacturer_id) => {
                 let manufacturer_id = cx.string(manufacturer_id);
                 obj.set(cx, "manufacturer_id", manufacturer_id)?;
-            },
+            }
             None => {}
         }
 
@@ -55,12 +56,16 @@ impl StructToObject for EnhancedDisplay {
 pub fn display_info(mut cx: FunctionContext) -> JsResult<JsArray> {
     let array = cx.empty_array();
 
-    get_enhanced_displays().enumerate().for_each(|(index, display)| {
-        let obj = display.to_object(&mut cx);
-        if obj.is_ok() {
-            let _ = array.set(&mut cx, index as u32, obj.unwrap());
-        }
+    get_enhanced_displays(Query::Any, false)
+        .or_else(|error| cx.throw_error(error.to_string()))?
+        .iter()
+        .for_each(|display| {
+            let obj = display.to_object(&mut cx);
+            if obj.is_ok() {
+                let _ = array.set(&mut cx, display.id as u32, obj.unwrap());
+            }
     });
+
     Ok(array)
 }
 

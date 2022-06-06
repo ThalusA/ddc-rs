@@ -11,7 +11,8 @@ use neon_bindings::{display_get_brightness, display_set_brightness, display_info
 use neon::prelude::*;
 
 use ddc::{Ddc, DdcHost, VcpValue};
-use ddc_hi::{Display, Query};
+use ddc_hi::Display;
+pub use ddc_hi::Query;
 
 pub struct EnhancedDisplay {
     pub inner_display: Display,
