@@ -1,23 +1,20 @@
-use ddc_hi::Query;
+use ddc_hi::{Display, Query};
 use neon::prelude::*;
-use crate::{get_brightness, set_brightness, EnhancedDisplay, get_enhanced_displays};
+use crate::{get_brightness, set_brightness, get_enhanced_displays};
 
 
 trait StructToObject {
     fn to_object<'a>(&self, cx: &mut impl Context<'a>) -> JsResult<'a, JsObject>;
 }
 
-impl StructToObject for EnhancedDisplay {
-    fn to_object<'a>(self: &EnhancedDisplay, cx: &mut impl Context<'a>) -> JsResult<'a, JsObject> {
+impl StructToObject for Display {
+    fn to_object<'a>(self: &Display, cx: &mut impl Context<'a>) -> JsResult<'a, JsObject> {
         let obj = cx.empty_object();
 
-        let id = cx.string(self.inner_display.info.id.clone());
-        obj.set(cx, "display_id", id)?;
+        let display_id = cx.string(self.info.id.clone());
+        obj.set(cx, "display_id", display_id)?;
 
-        let id = cx.number(self.id as f64);
-        obj.set(cx, "id", id)?;
-
-        match &self.inner_display.info.serial_number {
+        match &self.info.serial_number {
             Some(serial_number) => {
                 let serial_number = cx.string(serial_number);
                 obj.set(cx, "serial_number", serial_number)?;
@@ -25,7 +22,7 @@ impl StructToObject for EnhancedDisplay {
             None => {}
         }
 
-        match &self.inner_display.info.model_name {
+        match &self.info.model_name {
             Some(model_name) => {
                 let model_name = cx.string(model_name);
                 obj.set(cx, "model_name", model_name)?;
@@ -33,7 +30,7 @@ impl StructToObject for EnhancedDisplay {
             None => {}
         }
 
-        match &self.inner_display.info.model_id {
+        match &self.info.model_id {
             Some(model_id) => {
                 let model_id = cx.string(model_id.to_string());
                 obj.set(cx, "model_id", model_id)?;
@@ -41,7 +38,7 @@ impl StructToObject for EnhancedDisplay {
             None => {}
         }
 
-        match &self.inner_display.info.manufacturer_id {
+        match &self.info.manufacturer_id {
             Some(manufacturer_id) => {
                 let manufacturer_id = cx.string(manufacturer_id);
                 obj.set(cx, "manufacturer_id", manufacturer_id)?;
@@ -58,11 +55,14 @@ pub fn display_info(mut cx: FunctionContext) -> JsResult<JsArray> {
 
     get_enhanced_displays(Query::Any, false)
         .or_else(|error| cx.throw_error(error.to_string()))?
-        .iter()
-        .for_each(|display| {
+        .iter().enumerate()
+        .for_each(|(id, display)| {
             let obj = display.to_object(&mut cx);
             if obj.is_ok() {
-                let _ = array.set(&mut cx, display.id as u32, obj.unwrap());
+                let obj = obj.unwrap();
+                let string_id = cx.string(id.to_string());
+                let _ = obj.set(&mut cx, "id", string_id);
+                let _ = array.set(&mut cx, id as u32, obj);
             }
     });
 
