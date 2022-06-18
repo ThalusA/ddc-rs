@@ -12,14 +12,15 @@ NodeJS: https://github.com/ThalusA/ddc-enhanced-rs/blob/master/index.d.ts
 
 ### Rust
 ```rust
-use ddc_enhanced_rs::EnhancedDisplay;
+use ddc_enhanced_rs::{get_enhanced_displays, get_brightness, set_brightness};
 
-fn main() {
-  for display_info in EnhancedDisplay::list_infos() {
-    let mut display = EnhancedDisplay::get(display_info.id).unwrap();
-    let value = display.get_brightness().unwrap().value();
-    display.set_brightness(value + 2).unwrap();
-  }
+// index in array is the id of the display
+fn main() -> Result<(), std::io::Error> {
+    for id in get_enhanced_displays()?.len() {
+        let value = get_brightness(id)?.value();
+        set_brightness(id, value + 2).unwrap();
+    }
+    Ok(())
 }
 ```
 
@@ -28,8 +29,8 @@ fn main() {
 import Display from "ddc-enhanced-rs";
 
 for (const display_info of Display.list()) {
-  const display = new Display(display_info.id);
-  const { value } = display.brightness;
-  display.set_brightness(value + 2);
+    const display = new Display(display_info.id);
+    const { value } = display.brightness;
+    display.set_brightness(value + 2);
 }
 ```

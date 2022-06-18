@@ -14,31 +14,23 @@ use ddc::{Ddc, DdcHost, FeatureCode, VcpValue};
 use ddc_hi::Display;
 pub use ddc_hi::Query;
 
-pub fn get_enhanced_displays(query: Query, needs_caps: bool) -> Result<Vec<Display>, Error> {
+pub fn get_enhanced_displays() -> Result<Vec<Display>, Error> {
     Display::enumerate().into_iter().map(|mut display|
-        if needs_caps {
-            display.update_capabilities()
-                .map(|_| display)
-                .map_err(|err| Error::new(ErrorKind::TimedOut, err.to_string()))
-        } else {
-            Ok(display)
-        }
-    ).filter(|display| if let &Ok(ref display) = display {
-        query.matches(&display.info)
-    } else {
-        true
-    }).collect()
+        display.update_capabilities()
+            .map(|_| display)
+            .map_err(|err| Error::new(ErrorKind::TimedOut, err.to_string()))
+    ).collect()
 }
 
-pub fn get_enhanced_display(query: Query, needs_caps: bool, id: usize) -> Result<Display, Error> {
-    get_enhanced_displays(query, needs_caps)?
+pub fn get_enhanced_display(id: usize) -> Result<Display, Error> {
+    get_enhanced_displays()?
         .into_iter()
         .nth(id)
         .ok_or(Error::new(ErrorKind::Unsupported, format!("There is no display with id: {}", id)))
 }
 
 pub fn get_brightness(id: usize) -> Result<VcpValue, Error> {
-    let mut display = get_enhanced_display(Query::Any, true, id)?;
+    let mut display = get_enhanced_display(id)?;
     let result = display.info.mccs_database
         .get(mccs::ImageAdjustment::Luminance as FeatureCode)
         .map(|feature| display.handle.get_vcp_feature(feature.code)
@@ -49,7 +41,7 @@ pub fn get_brightness(id: usize) -> Result<VcpValue, Error> {
 }
 
 pub fn set_brightness(id: usize, value: u16) -> Result<(), Error> {
-    let mut display = get_enhanced_display(Query::Any, true, id)?;
+    let mut display = get_enhanced_display(id)?;
     let result = display.info.mccs_database
         .get(mccs::ImageAdjustment::Luminance as FeatureCode)
         .map(|feature| display.handle.set_vcp_feature(feature.code, value)
