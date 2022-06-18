@@ -11,8 +11,7 @@ use neon_bindings::{display_get_brightness, display_set_brightness, display_info
 use neon::prelude::*;
 
 use ddc::{Ddc, DdcHost, FeatureCode, VcpValue};
-use ddc_hi::Display;
-pub use ddc_hi::Query;
+pub use ddc_hi::Display;
 
 pub fn get_enhanced_displays() -> Result<Vec<Display>, Error> {
     Display::enumerate().into_iter().map(|mut display|

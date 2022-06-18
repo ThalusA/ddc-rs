@@ -1,4 +1,4 @@
-use ddc_hi::{Display, Query};
+use ddc_hi::Display;
 use neon::prelude::*;
 use crate::{get_brightness, set_brightness, get_enhanced_displays};
 
