@@ -1,4 +1,4 @@
-use ddc_hi::Display;
+use ddc_hi::{Backend, Display};
 use neon::prelude::*;
 use crate::{get_brightness, set_brightness, get_displays};
 
@@ -99,10 +99,10 @@ impl StructToObject for Display {
         }
 
         let backend = match &self.info.backend {
-            I2cDevice => cx.string("i2c"),
-            WinApi => cx.string("winapi"),
-            Nvapi => cx.string("nvapi"),
-            MacOS => cx.string("macos")
+            Backend::I2cDevice => cx.string("i2c"),
+            Backend::WinApi => cx.string("winapi"),
+            Backend::Nvapi => cx.string("nvapi"),
+            Backend::MacOS => cx.string("macos")
         };
         obj.set(cx, "backend", backend)?;
 
