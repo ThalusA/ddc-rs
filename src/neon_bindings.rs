@@ -56,13 +56,13 @@ pub fn displays_info(mut cx: FunctionContext) -> JsResult<JsArray> {
     get_displays(false)
         .or_else(|error| cx.throw_error(error.to_string()))?
         .iter().enumerate()
-        .for_each(|(id, display)| {
+        .for_each(|(index, display)| {
             let obj = display.to_object(&mut cx);
             if obj.is_ok() {
                 let obj = obj.unwrap();
-                let string_id = cx.string(id.to_string());
-                let _ = obj.set(&mut cx, "id", string_id);
-                let _ = array.set(&mut cx, id as u32, obj);
+                let id = cx.number(index as f64);
+                let _ = obj.set(&mut cx, "id", id);
+                let _ = array.set(&mut cx, index as u32, obj);
             }
     });
 
