@@ -16,7 +16,7 @@ class Display {
     }
 
     does_support_ddc() {
-        return display_support_ddc();
+        return display_support_ddc(this.id);
     }
 
     static info() {
