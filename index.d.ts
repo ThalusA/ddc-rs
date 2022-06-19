@@ -17,7 +17,7 @@ export default class Display {
 
     get_brightness(): DisplayValue;
     set_brightness(value: number);
-    does_support_ddc(): Boolean;
+    does_support_ddc(): boolean;
 
     static info(): Array<DisplayInfo>;
 }
