@@ -1,6 +1,6 @@
 use ddc_hi::Display;
 use neon::prelude::*;
-use crate::{get_brightness, set_brightness, get_displays, does_display_support_ddc};
+use crate::{get_brightness, set_brightness, get_displays};
 
 
 trait StructToObject {
@@ -13,6 +13,14 @@ impl StructToObject for Display {
 
         let display_id = cx.string(self.info.id.clone());
         obj.set(cx, "display_id", display_id)?;
+
+        match &self.info.serial {
+            Some(serial) => {
+                let serial = cx.number(*serial as f64);
+                obj.set(cx, "serial", serial)?;
+            }
+            None => {}
+        }
 
         match &self.info.serial_number {
             Some(serial_number) => {
@@ -38,6 +46,14 @@ impl StructToObject for Display {
             None => {}
         }
 
+        match &self.info.version {
+            Some((major, minor)) => {
+                let version = cx.string(format!("{}.{}", *major, *minor));
+                obj.set(cx, "version", version)?;
+            }
+            None => {}
+        }
+
         match &self.info.manufacturer_id {
             Some(manufacturer_id) => {
                 let manufacturer_id = cx.string(manufacturer_id);
@@ -45,6 +61,50 @@ impl StructToObject for Display {
             }
             None => {}
         }
+
+        match &self.info.manufacture_week {
+            Some(manufacture_week) => {
+                let manufacture_week = cx.number(*manufacture_week as f64);
+                obj.set(cx, "manufacture_week", manufacture_week)?;
+            }
+            None => {}
+        }
+
+        match &self.info.manufacture_year {
+            Some(manufacture_year) => {
+                let manufacture_year = cx.number(*manufacture_year as f64);
+                obj.set(cx, "manufacture_year", manufacture_year)?;
+            }
+            None => {}
+        }
+
+        match &self.info.mccs_version {
+            Some(mccs_version) => {
+                let mccs_version = cx.string(mccs_version.to_string());
+                obj.set(cx, "mccs_version", mccs_version)?;
+            }
+            None => {}
+        }
+
+        match &self.info.edid_data {
+            Some(edid_data) => {
+                let edid_data_buffer = cx.array_buffer(edid_data.len())?;
+                for (index, &edid_byte) in edid_data.iter().enumerate() {
+                    let edid_byte = cx.number(edid_byte);
+                    edid_data_buffer.set(cx, index as u32, edid_byte)?;
+                }
+                obj.set(cx, "edid_data", edid_data_buffer)?;
+            }
+            None => {}
+        }
+
+        let backend = match &self.info.backend {
+            I2cDevice => cx.string("i2c"),
+            WinApi => cx.string("winapi"),
+            Nvapi => cx.string("nvapi"),
+            MacOS => cx.string("macos")
+        };
+        obj.set(cx, "backend", backend)?;
 
         Ok(obj)
     }
@@ -67,15 +127,6 @@ pub fn displays_info(mut cx: FunctionContext) -> JsResult<JsArray> {
     });
 
     Ok(array)
-}
-
-pub fn display_support_ddc(mut cx: FunctionContext) -> JsResult<JsBoolean> {
-    let id = cx.argument::<JsNumber>(0)?.value(&mut cx) as usize;
-
-    let display_does_support_ddc = does_display_support_ddc(id)
-        .or_else(|error| cx.throw_error(error.to_string()))?;
-
-    Ok(cx.boolean(display_does_support_ddc))
 }
 
 pub fn display_get_brightness(mut cx: FunctionContext) -> JsResult<JsObject> {

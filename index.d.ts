@@ -4,12 +4,19 @@ export interface DisplayValue {
 }
 
 export interface DisplayInfo {
-    display_id: string;
+    backend: string;
+    edid_data?: ArrayBuffer;
+    version?: string;
+    mccs_version?: string;
     id: number;
+    display_id: string;
+    serial?: number
     serial_number?: string;
-    model_name?: string;
     model_id?: number;
+    model_name?: string;
     manufacturer_id?: string;
+    manufacture_year?: number;
+    manufacture_week?: number;
 }
 
 export default class Display {
@@ -17,7 +24,6 @@ export default class Display {
 
     get_brightness(): DisplayValue;
     set_brightness(value: number);
-    does_support_ddc(): boolean;
 
     static info(): Array<DisplayInfo>;
 }

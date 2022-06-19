@@ -6,24 +6,40 @@ use std::io::{Error, ErrorKind};
 mod neon_bindings;
 
 #[cfg(feature = "node-bindings")]
-use neon_bindings::{display_get_brightness, display_set_brightness,
-                    displays_info, display_support_ddc};
+use neon_bindings::{display_get_brightness, display_set_brightness, displays_info};
 #[cfg(feature = "node-bindings")]
 use neon::prelude::*;
 
 use ddc::{Ddc, DdcHost, FeatureCode, VcpValue};
+use ddc_hi::Backend;
 pub use ddc_hi::Display;
 
 pub fn get_displays(needs_caps: bool) -> Result<Vec<Display>, Error> {
-    Display::enumerate().into_iter().map(|mut display|
-        if needs_caps {
+    let mut displays = Display::enumerate().into_iter().map(|mut display|
+        if needs_caps && display.info.backend == Backend::WinApi {
             display.update_capabilities()
                 .map(|_| display)
                 .map_err(|err| Error::new(ErrorKind::TimedOut, err.to_string()))
         } else {
             Ok(display)
         }
-    ).collect()
+    );
+    if displays.find(|display| if let &Ok(ref display) = display {
+        (&display.info).backend == Backend::Nvapi
+    } else {
+        false
+    }).is_some() {
+        let displays = displays.filter(|display|
+            if let &Ok(ref display) = display {
+                (&display.info).backend != Backend::WinApi
+            } else {
+                true
+            }
+        );
+        displays.collect()
+    } else {
+        displays.collect()
+    }
 }
 
 pub fn get_display(needs_caps: bool, id: usize) -> Result<Display, Error> {
@@ -32,15 +48,6 @@ pub fn get_display(needs_caps: bool, id: usize) -> Result<Display, Error> {
         .nth(id)
         .ok_or(Error::new(ErrorKind::Unsupported,
                           format!("There is no display with id: {}", id)))
-}
-
-pub fn does_display_support_ddc(id: usize) -> Result<bool, Error> {
-    get_displays(false)?
-        .into_iter()
-        .nth(id)
-        .ok_or(Error::new(ErrorKind::Unsupported,
-                          format!("There is no display with id: {}", id)))
-        .map(|mut display| display.update_capabilities().is_ok())
 }
 
 pub fn get_brightness(id: usize) -> Result<VcpValue, Error> {
@@ -71,7 +78,6 @@ pub fn set_brightness(id: usize, value: u16) -> Result<(), Error> {
 #[neon::main]
 fn main(mut cx: ModuleContext) -> NeonResult<()> {
     cx.export_function("displays_info", displays_info)?;
-    cx.export_function("display_support_ddc", display_support_ddc)?;
     cx.export_function("display_get_brightness", display_get_brightness)?;
     cx.export_function("display_set_brightness", display_set_brightness)?;
     Ok(())
