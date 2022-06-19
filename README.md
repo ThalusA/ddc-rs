@@ -12,7 +12,8 @@ NodeJS: https://github.com/ThalusA/ddc-enhanced-rs/blob/master/index.d.ts
 
 ### Rust
 ```rust
-use ddc_enhanced_rs::{get_enhanced_displays, get_brightness, set_brightness};
+use ddc_enhanced_rs::{get_enhanced_displays, get_brightness,
+                      set_brightness, does_display_support_ddc};
 
 // index in array is the id of the display
 fn main() -> Result<(), std::io::Error> {
