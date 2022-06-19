@@ -53,7 +53,7 @@ impl StructToObject for Display {
 pub fn display_info(mut cx: FunctionContext) -> JsResult<JsArray> {
     let array = cx.empty_array();
 
-    get_enhanced_displays()
+    get_enhanced_displays(false)
         .or_else(|error| cx.throw_error(error.to_string()))?
         .iter().enumerate()
         .for_each(|(id, display)| {

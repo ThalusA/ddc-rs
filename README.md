@@ -16,7 +16,7 @@ use ddc_enhanced_rs::{get_enhanced_displays, get_brightness, set_brightness};
 
 // index in array is the id of the display
 fn main() -> Result<(), std::io::Error> {
-    for id in 0..get_enhanced_displays()?.len() {
+    for id in 0..get_enhanced_displays(false)?.len() {
         let value = get_brightness(id)?.value();
         set_brightness(id, value + 2).unwrap();
     }
@@ -30,7 +30,7 @@ import Display from "ddc-enhanced-rs";
 
 for (const display_info of Display.list()) {
     const display = new Display(display_info.id);
-    const { value } = display.brightness;
+    const { value } = display.get_brightness();
     display.set_brightness(value + 2);
 }
 ```
