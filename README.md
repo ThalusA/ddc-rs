@@ -17,8 +17,10 @@ use ddc_enhanced_rs::{get_enhanced_displays, get_brightness, set_brightness};
 // index in array is the id of the display
 fn main() -> Result<(), std::io::Error> {
     for id in 0..get_enhanced_displays(false)?.len() {
-        let value = get_brightness(id)?.value();
-        set_brightness(id, value + 2).unwrap();
+        if does_display_support_ddc(id)? {
+            let value = get_brightness(id)?.value();
+            set_brightness(id, value + 2).unwrap();
+        }
     }
     Ok(())
 }
@@ -28,9 +30,11 @@ fn main() -> Result<(), std::io::Error> {
 ```javascript
 import Display from "ddc-enhanced-rs";
 
-for (const display_info of Display.list()) {
+for (const display_info of Display.info()) {
     const display = new Display(display_info.id);
-    const { value } = display.get_brightness();
-    display.set_brightness(value + 2);
+    if (display.does_support_ddc()) {
+        const { value } = display.get_brightness();
+        display.set_brightness(value + 2);
+    }
 }
 ```

@@ -1,6 +1,6 @@
 use ddc_hi::Display;
 use neon::prelude::*;
-use crate::{get_brightness, set_brightness, get_enhanced_displays};
+use crate::{get_brightness, set_brightness, get_displays, does_display_support_ddc};
 
 
 trait StructToObject {
@@ -50,10 +50,10 @@ impl StructToObject for Display {
     }
 }
 
-pub fn display_info(mut cx: FunctionContext) -> JsResult<JsArray> {
+pub fn displays_info(mut cx: FunctionContext) -> JsResult<JsArray> {
     let array = cx.empty_array();
 
-    get_enhanced_displays(false)
+    get_displays(false)
         .or_else(|error| cx.throw_error(error.to_string()))?
         .iter().enumerate()
         .for_each(|(id, display)| {
@@ -67,6 +67,15 @@ pub fn display_info(mut cx: FunctionContext) -> JsResult<JsArray> {
     });
 
     Ok(array)
+}
+
+pub fn display_support_ddc(mut cx: FunctionContext) -> JsResult<JsBoolean> {
+    let id = cx.argument::<JsNumber>(0)?.value(&mut cx) as usize;
+
+    let display_does_support_ddc = does_display_support_ddc(id)
+        .or_else(|error| cx.throw_error(error.to_string()))?;
+
+    Ok(cx.boolean(display_does_support_ddc))
 }
 
 pub fn display_get_brightness(mut cx: FunctionContext) -> JsResult<JsObject> {

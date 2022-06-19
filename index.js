@@ -1,5 +1,5 @@
 const {
-    display_info, display_get_brightness, display_set_brightness
+    displays_info, display_get_brightness, display_set_brightness, display_support_ddc
 } = require("./ddc_enhanced_rs.node");
 
 class Display {
@@ -15,8 +15,12 @@ class Display {
         return display_set_brightness(this.id, value);
     }
 
+    does_support_ddc() {
+        return display_support_ddc();
+    }
+
     static info() {
-        return display_info();
+        return displays_info();
     }
 }
 
