@@ -5,7 +5,7 @@
 
 ## Documentation
 
-https://github.com/ThalusA/ddc-rs/blob/master/index.d.ts
+https://github.com/ThalusA/ddc-rs/blob/master/index.ts
 
 ## Examples
 

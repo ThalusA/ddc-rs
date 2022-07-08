@@ -1,17 +1,17 @@
 {
   "name": "ddc-rs",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "author": "Alexandre MONIER <alexandre.monierc@gmail.com>",
   "description": "DDC/CI high level library for NodeJS (cross platform)",
   "main": "index.js",
   "files": [
-    "index.d.ts",
+    "index.ts",
     "src",
     "Cargo.toml"
   ],
   "scripts": {
-    "build": "cargo-cp-artifact -nc ddc_rs.node -- cargo build --message-format=json-render-diagnostics",
-    "install": "cargo-cp-artifact -nc ddc_rs.node -- cargo build --message-format=json-render-diagnostics",
+    "build": "tsc && cargo-cp-artifact -nc ddc_rs.node -- cargo build --message-format=json-render-diagnostics",
+    "install": "tsc && cargo-cp-artifact -nc ddc_rs.node -- cargo build --message-format=json-render-diagnostics",
     "test": "cargo test"
   },
   "license": "MIT",
