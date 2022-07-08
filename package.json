@@ -1,6 +1,6 @@
 {
   "name": "ddc-rs",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "author": "Alexandre MONIER <alexandre.monierc@gmail.com>",
   "description": "DDC/CI high level library for NodeJS (cross platform)",
   "main": "index.js",
@@ -8,6 +8,8 @@
     "ddc_rs.node.d.ts",
     "index.d.ts",
     "index.js",
+    "types.d.ts",
+    "types.js",
     "src",
     "Cargo.toml"
   ],

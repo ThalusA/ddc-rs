@@ -1,13 +1,16 @@
 /* eslint-disable no-unused-vars */
 
 import {
-  displayGetVcpFeature, displaySetVcpFeature, displaySetTableVcpFeature, displayManagerGetByIndex, displayManagerList,
-  VCPValue, Query, DisplayData
+  displayGetVcpFeature, displaySetVcpFeature, displaySetTableVcpFeature, displayManagerGetByIndex, displayManagerList
 } from './ddc_rs.node'
+
+import {
+  DisplayData, VCPValue, Query
+} from './types'
 
 export {
   VCPValue, Query, DisplayData, Continuous, NonContinuous, Table, VCPFeatures, QueryType, VCPFeatureCode, VCPValueType
-} from './ddc_rs.node'
+} from './types'
 
 export class Display {
   constructor (data: number | DisplayData) {
