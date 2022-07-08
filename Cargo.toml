@@ -1,21 +1,17 @@
 [package]
-name = "ddc-enhanced-rs"
-version = "1.2.7"
+name = "ddc-node-rs"
+version = "2.0.0"
 authors = ["Alexandre MONIER <alexandre.monierc@gmail.com>"]
 description = "DDC/CI high level library for Rust (cross platform)"
-documentation = "https://docs.rs/ddc-enhanced-rs"
-homepage = "https://github.com/ThalusA/ddc-enhanced-rs#readme"
+documentation = "https://docs.rs/ddc-node-rs"
+homepage = "https://github.com/ThalusA/ddc-node-rs#readme"
 readme = "README.md"
-repository = "https://github.com/ThalusA/ddc-enhanced-rs"
+repository = "https://github.com/ThalusA/ddc-node-rs"
 edition = "2021"
 license = "MIT"
 keywords = ["DDC", "DDC-CI"]
 categories = ["external-ffi-bindings", "os::linux-apis", "os::macos-apis", "os::windows-apis"]
-exclude = ["ddc_enhanced_rs.node"]
-
-[features]
-default = []
-node-bindings = ["neon"]
+exclude = ["ddc_node_rs.node"]
 
 [lib]
 crate-type = ["lib", "cdylib"]
@@ -23,4 +19,5 @@ crate-type = ["lib", "cdylib"]
 [dependencies]
 ddc = "0.2.2"
 ddc-hi = "0.4.1"
-neon = { version = "0.10.0", default-features = false, features = ["napi-latest"], optional = true }
+mccs-db = "0.1.2"
+neon = { version = "0.10.1", default-features = false, features = ["napi-latest"] }

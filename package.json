@@ -1,6 +1,6 @@
 {
-  "name": "ddc-enhanced-rs",
-  "version": "1.2.7",
+  "name": "ddc-node-rs",
+  "version": "2.0.0",
   "author": "Alexandre MONIER <alexandre.monierc@gmail.com>",
   "description": "DDC/CI high level library for NodeJS (cross platform)",
   "main": "index.js",
@@ -10,8 +10,8 @@
     "Cargo.toml"
   ],
   "scripts": {
-    "build": "cargo-cp-artifact -nc ddc_enhanced_rs.node -- cargo build --features node-bindings --message-format=json-render-diagnostics",
-    "install": "cargo-cp-artifact -nc ddc_enhanced_rs.node -- cargo build --features node-bindings --message-format=json-render-diagnostics",
+    "build": "cargo-cp-artifact -nc ddc_node_rs.node -- cargo build --message-format=json-render-diagnostics",
+    "install": "cargo-cp-artifact -nc ddc_node_rs.node -- cargo build --message-format=json-render-diagnostics",
     "test": "cargo test"
   },
   "license": "MIT",
@@ -25,14 +25,14 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ThalusA/ddc-enhanced-rs.git"
+    "url": "git+https://github.com/ThalusA/ddc-node-rs.git"
   },
   "keywords": [
     "DDC/CI",
     "DDC"
   ],
   "bugs": {
-    "url": "https://github.com/ThalusA/ddc-enhanced-rs/issues"
+    "url": "https://github.com/ThalusA/ddc-node-rs/issues"
   },
-  "homepage": "https://github.com/ThalusA/ddc-enhanced-rs#readme"
+  "homepage": "https://github.com/ThalusA/ddc-node-rs#readme"
 }

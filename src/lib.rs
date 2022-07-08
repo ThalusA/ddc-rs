@@ -1,84 +1,101 @@
-pub mod mccs;
+extern crate core;
 
-use std::io::{Error, ErrorKind};
+mod data;
+mod neon_utils;
+mod utils;
 
-#[cfg(feature = "node-bindings")]
-mod neon_bindings;
-
-#[cfg(feature = "node-bindings")]
-use neon_bindings::{display_get_brightness, display_set_brightness, displays_info};
-#[cfg(feature = "node-bindings")]
+use crate::data::{StructFromObject, StructToObject, VcpWriteValue};
+use ddc_hi::{FeatureCode, Query};
 use neon::prelude::*;
+use neon::types::buffer::TypedArray;
 
-use ddc::{Ddc, DdcHost, FeatureCode, VcpValue};
-use ddc_hi::Backend;
-pub use ddc_hi::Display;
+pub fn display_get_vcp_feature(mut cx: FunctionContext) -> JsResult<JsObject> {
+    let index = cx.argument::<JsNumber>(0)?.value(&mut cx) as usize;
+    let feature_code = cx.argument::<JsNumber>(1)?.value(&mut cx) as FeatureCode;
 
-pub fn get_displays(needs_caps: bool) -> Result<Vec<Display>, Error> {
-    let mut displays = Display::enumerate().into_iter().map(|mut display|
-        if needs_caps && display.info.backend == Backend::WinApi {
-            display.update_capabilities()
-                .map(|_| display)
-                .map_err(|err| Error::new(ErrorKind::TimedOut, err.to_string()))
-        } else {
-            Ok(display)
-        }
-    );
-    if displays.find(|display| if let &Ok(ref display) = display {
-        (&display.info).backend == Backend::Nvapi
-    } else {
-        false
-    }).is_some() {
-        let displays = displays.filter(|display|
-            if let &Ok(ref display) = display {
-                (&display.info).backend != Backend::WinApi
-            } else {
-                true
-            }
-        );
-        displays.collect()
-    } else {
-        displays.collect()
+    match utils::get_vcp_feature(index, feature_code) {
+        Ok(value) => value.to_object(&mut cx),
+        Err(error) => cx.throw_error(error.to_string())?,
     }
 }
 
-pub fn get_display(needs_caps: bool, id: usize) -> Result<Display, Error> {
-    get_displays(needs_caps)?
-        .into_iter()
-        .nth(id)
-        .ok_or(Error::new(ErrorKind::Unsupported,
-                          format!("There is no display with id: {}", id)))
+pub fn display_set_vcp_feature(mut cx: FunctionContext) -> JsResult<JsUndefined> {
+    let index = cx.argument::<JsNumber>(0)?.value(&mut cx) as usize;
+    let feature_code = cx.argument::<JsNumber>(1)?.value(&mut cx) as FeatureCode;
+    let value = cx.argument::<JsNumber>(2)?.value(&mut cx) as u16;
+
+    let vcp_write_value = VcpWriteValue::Single(value);
+
+    match utils::set_vcp_feature(index, feature_code, vcp_write_value) {
+        Ok(_) => Ok(cx.undefined()),
+        Err(error) => cx.throw_error(error.to_string())?,
+    }
 }
 
-pub fn get_brightness(id: usize) -> Result<VcpValue, Error> {
-    let mut display = get_display(true, id)?;
-    let result = display.info.mccs_database
-        .get(mccs::ImageAdjustment::Luminance as FeatureCode)
-        .map(|feature| display.handle.get_vcp_feature(feature.code)
-            .map_err(|error| Error::new(ErrorKind::TimedOut, error.to_string())))
-        .or(Some(Err(Error::new(ErrorKind::Unsupported,
-                                "This display doesn't support brightness operations")))).unwrap();
-    display.handle.sleep();
-    result
+pub fn display_set_table_vcp_feature(mut cx: FunctionContext) -> JsResult<JsUndefined> {
+    let index = cx.argument::<JsNumber>(0)?.value(&mut cx) as usize;
+    let feature_code = cx.argument::<JsNumber>(1)?.value(&mut cx) as FeatureCode;
+    let offset = cx.argument::<JsNumber>(3)?.value(&mut cx) as u16;
+    let data = cx.argument::<JsArrayBuffer>(2)?;
+    let data = data.as_slice(&mut cx);
+
+    let vcp_write_value = VcpWriteValue::Bytes(Vec::from(data), offset);
+
+    match utils::set_vcp_feature(index, feature_code, vcp_write_value) {
+        Ok(_) => Ok(cx.undefined()),
+        Err(error) => cx.throw_error(error.to_string())?,
+    }
 }
 
-pub fn set_brightness(id: usize, value: u16) -> Result<(), Error> {
-    let mut display = get_display(true, id)?;
-    let result = display.info.mccs_database
-        .get(mccs::ImageAdjustment::Luminance as FeatureCode)
-        .map(|feature| display.handle.set_vcp_feature(feature.code, value)
-            .map_err(|error| Error::new(ErrorKind::TimedOut, error.to_string())))
-        .or(Some(Err(Error::new(ErrorKind::Unsupported,
-                                "This display doesn't support brightness operations")))).unwrap();
-    display.handle.sleep();
-    result
+pub fn display_manager_get_by_index(mut cx: FunctionContext) -> JsResult<JsObject> {
+    let index = cx.argument::<JsNumber>(0)?.value(&mut cx) as usize;
+
+    let (index, display) =
+        utils::get_display(false, index).or_else(|error| cx.throw_error(error.to_string()))?;
+    let display_object = display.to_object(&mut cx)?;
+    let index = cx.number(index as f64);
+    display_object.set(&mut cx, "index", index)?;
+
+    Ok(display_object)
 }
 
-#[cfg(feature = "node-bindings")]
+pub fn display_manager_list(mut cx: FunctionContext) -> JsResult<JsArray> {
+    let queries = cx.argument::<JsArray>(0)?.to_vec(&mut cx)?;
+    let mut effective_queries: Vec<Query> = vec![];
+
+    for query in queries {
+        if query.is_a::<JsObject, _>(&mut cx) {
+            let query = query.downcast::<JsObject, _>(&mut cx).unwrap();
+            if let Some(query) = Query::from_object(&mut cx, query) {
+                effective_queries.push(query);
+            }
+        }
+    }
+    let final_query = if effective_queries.len() == 0 {
+        Query::Any
+    } else {
+        Query::And(effective_queries)
+    };
+
+    let displays = utils::get_displays(false, final_query)
+        .or_else(|error| cx.throw_error(error.to_string()))?;
+    let displays_array = cx.empty_array();
+    for (array_index, (index, display)) in displays.into_iter().enumerate() {
+        let display_object = display.to_object(&mut cx)?;
+        let index = cx.number(index as f64);
+        display_object.set(&mut cx, "index", index)?;
+        displays_array.set(&mut cx, array_index as u32, display_object)?;
+    }
+
+    Ok(displays_array)
+}
+
 #[neon::main]
 fn main(mut cx: ModuleContext) -> NeonResult<()> {
-    cx.export_function("displays_info", displays_info)?;
-    cx.export_function("display_get_brightness", display_get_brightness)?;
-    cx.export_function("display_set_brightness", display_set_brightness)?;
+    cx.export_function("displayGetVcpFeature", display_get_vcp_feature)?;
+    cx.export_function("displaySetVcpFeature", display_set_vcp_feature)?;
+    cx.export_function("displaySetTableVcpFeature", display_set_table_vcp_feature)?;
+    cx.export_function("displayManagerGetByIndex", display_manager_get_by_index)?;
+    cx.export_function("displayManagerList", display_manager_list)?;
     Ok(())
 }

@@ -1,37 +1,24 @@
-# ddc-enhanced-rs
+# ddc-node-rs
 
-`ddc-enhanced-rs` is a cross platform Rust crate and Node package for controlling monitors with [DDC/CI](https://en.wikipedia.org/wiki/Display_Data_Channel).
+`ddc-node-rs` is a cross-platform Node package for controlling monitors with
+[DDC/CI](https://en.wikipedia.org/wiki/Display_Data_Channel).
 
 ## Documentation
 
-Rust: https://docs.rs/ddc-enhanced-rs
-
-NodeJS: https://github.com/ThalusA/ddc-enhanced-rs/blob/master/index.d.ts
+https://github.com/ThalusA/ddc-node-rs/blob/master/index.d.ts
 
 ## Examples
 
-### Rust
-```rust
-use ddc_enhanced_rs::{get_enhanced_displays, get_brightness,
-                      set_brightness, does_display_support_ddc};
-
-// index in array is the id of the display
-fn main() -> Result<(), std::io::Error> {
-    for id in 0..get_enhanced_displays(false)?.len() {
-        let value = get_brightness(id)?.value();
-        set_brightness(id, value + 2).unwrap();
-    }
-    Ok(())
-}
-```
-
-### NodeJS
 ```javascript
-import Display from "ddc-enhanced-rs";
+import { Display, DisplayManager, VCPFeatures } from "ddc-node-rs";
 
-for (const display_info of Display.info()) {
-    const display = new Display(display_info.id);
-    const { value } = display.get_brightness();
-    display.set_brightness(value + 2);
+const displays = (new DisplayManager()).collect();
+
+for (const display of displays) {
+    const vcp_feature = display.getVcpFeature(VCPFeatures.ImageAdjustment.Luminance);
+    console.info(`Display at index ${display.index} have a brightness value of`);
+    console.info(vcp_feature);
+    display.setVcpFeature(VCPFeatures.ImageAdjustment.Luminance,
+                          vcp_feature.currentValue + 5);
 }
 ```
