@@ -1,6 +1,6 @@
 const {
   displayGetVcpFeature, displaySetVcpFeature, displaySetTableVcpFeature, displayManagerGetByIndex, displayManagerList
-} = require('./ddc_node_rs.node')
+} = require('./ddc_rs.node')
 
 class Display {
   constructor (data) {
