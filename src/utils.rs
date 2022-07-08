@@ -43,10 +43,10 @@ pub fn get_vcp_feature(
     display_index: usize,
     feature_code: FeatureCode,
 ) -> Result<VcpReadValue, Error> {
-    let mut display = get_display(true, display_index)?.1;
-    display
-        .update_from_ddc()
-        .map_err(|error| Error::new(ErrorKind::TimedOut, error.to_string()))?;
+    let mut display = get_display(false, display_index)?.1;
+    // display
+    //     .update_from_ddc()
+    //     .map_err(|error| Error::new(ErrorKind::TimedOut, error.to_string()))?;
     let feature = display.info.mccs_database.get(feature_code);
     let handle = &mut display.handle;
     if let Some(feature) = feature {
@@ -136,7 +136,7 @@ pub fn set_vcp_feature(
     feature_code: FeatureCode,
     value: VcpWriteValue,
 ) -> Result<(), Error> {
-    let mut display = get_display(true, display_index)?.1;
+    let mut display = get_display(false, display_index)?.1;
 
     match value {
         VcpWriteValue::Single(value) => {
