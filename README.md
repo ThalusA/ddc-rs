@@ -12,7 +12,7 @@ https://github.com/ThalusA/ddc-node-rs/blob/master/index.d.ts
 ```javascript
 import { Display, DisplayManager, VCPFeatures } from "ddc-node-rs";
 
-const displays = (new DisplayManager()).collect();
+const displays = new DisplayManager().collect();
 
 for (const display of displays) {
     const vcp_feature = display.getVcpFeature(VCPFeatures.ImageAdjustment.Luminance);

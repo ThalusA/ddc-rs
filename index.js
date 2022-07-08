@@ -74,7 +74,7 @@ class DisplayManager {
     }
 
     collect() {
-        return displayManagerList.map(display => new Display(display));
+        return displayManagerList(this.queries).map(display => new Display(display));
     }
 
     list = this.collect;
