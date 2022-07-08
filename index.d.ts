@@ -1,8 +1,15 @@
 /* eslint-disable no-unused-vars */
 
+export enum VCPValueType {
+  CONTINUOUS = 'CONTINUOUS',
+  NON_CONTINUOUS = 'NON_CONTINUOUS',
+  TABLE = 'TABLE'
+}
+
 export interface Continuous {
   currentValue: number;
   maximumValue: number;
+  type: VCPValueType.CONTINUOUS;
 }
 
 export interface NonContinuous {
@@ -10,10 +17,12 @@ export interface NonContinuous {
   currentValue: [number, string | undefined];
   /** This map all possibles values number representation into their string representation if existing. */
   possibleValues: Record<number, string | undefined>;
+  type: VCPValueType.NON_CONTINUOUS;
 }
 
 export interface Table {
   currentData: ArrayBuffer;
+  type: VCPValueType.TABLE;
 }
 
 export type VCPValue = Continuous | NonContinuous | Table;

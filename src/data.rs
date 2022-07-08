@@ -140,6 +140,9 @@ impl StructToObject for Continuous {
         let maximum_value = cx.number(self.maximum_value);
         struct_object.set(cx, "maximumValue", maximum_value)?;
 
+        let struct_type = cx.string("CONTINUOUS");
+        struct_object.set(cx, "type", struct_type)?;
+
         Ok(struct_object)
     }
 }
@@ -174,6 +177,9 @@ impl StructToObject for NonContinuous {
             }
         }
 
+        let struct_type = cx.string("NON_CONTINUOUS");
+        struct_object.set(cx, "type", struct_type)?;
+
         Ok(struct_object)
     }
 }
@@ -189,6 +195,9 @@ impl StructToObject for Table {
         let current_data = &self.current_data;
         let current_data = byte_vec_to_bytearray(current_data, cx)?;
         struct_object.set(cx, "currentData", current_data)?;
+
+        let struct_type = cx.string("TABLE");
+        struct_object.set(cx, "type", struct_type)?;
 
         Ok(struct_object)
     }
