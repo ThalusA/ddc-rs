@@ -5,7 +5,9 @@ import {
   VCPValue, Query, DisplayData
 } from './ddc_rs.node'
 
-export { VCPFeatures } from './ddc_rs.node'
+export {
+  VCPValue, Query, DisplayData, Continuous, NonContinuous, Table, VCPFeatures, QueryType, VCPFeatureCode, VCPValueType
+} from './ddc_rs.node'
 
 export class Display {
   constructor (data: number | DisplayData) {
@@ -75,7 +77,7 @@ export class DisplayManager {
     this._queries = queries
   }
 
-  addQueries(queries?: Query[] | Query): DisplayManager {
+  addQueries (queries?: Query[] | Query): DisplayManager {
     let newQueries: Query[]
     if (Array.isArray(queries)) {
       newQueries = queries
@@ -103,4 +105,3 @@ export class DisplayManager {
 
   private _queries: Query[]
 }
-
