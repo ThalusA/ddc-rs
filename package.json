@@ -10,8 +10,8 @@
     "Cargo.toml"
   ],
   "scripts": {
-    "build": "cargo-cp-artifact -nc ddc_node_rs.node -- cargo build --message-format=json-render-diagnostics",
-    "install": "cargo-cp-artifact -nc ddc_node_rs.node -- cargo build --message-format=json-render-diagnostics",
+    "build": "cargo-cp-artifact -nc ddc_rs.node -- cargo build --message-format=json-render-diagnostics",
+    "install": "cargo-cp-artifact -nc ddc_rs.node -- cargo build --message-format=json-render-diagnostics",
     "test": "cargo test"
   },
   "license": "MIT",
@@ -25,16 +25,16 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ThalusA/ddc-node-rs.git"
+    "url": "git+https://github.com/ThalusA/ddc-rs.git"
   },
   "keywords": [
     "DDC/CI",
     "DDC"
   ],
   "bugs": {
-    "url": "https://github.com/ThalusA/ddc-node-rs/issues"
+    "url": "https://github.com/ThalusA/ddc-rs/issues"
   },
-  "homepage": "https://github.com/ThalusA/ddc-node-rs#readme",
+  "homepage": "https://github.com/ThalusA/ddc-rs#readme",
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.30.5",
     "@typescript-eslint/parser": "^5.30.5",

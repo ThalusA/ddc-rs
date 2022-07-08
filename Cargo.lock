@@ -129,8 +129,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "ddc-node-rs"
-version = "2.0.0"
+name = "ddc-rs"
+version = "0.1.0"
 dependencies = [
  "ddc",
  "ddc-hi",

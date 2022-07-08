@@ -1,16 +1,16 @@
-# ddc-node-rs
+# ddc-rs
 
-`ddc-node-rs` is a cross-platform Node package for controlling monitors with
+`ddc-rs` is a cross-platform Node package for controlling monitors with
 [DDC/CI](https://en.wikipedia.org/wiki/Display_Data_Channel).
 
 ## Documentation
 
-https://github.com/ThalusA/ddc-node-rs/blob/master/index.d.ts
+https://github.com/ThalusA/ddc-rs/blob/master/index.d.ts
 
 ## Examples
 
 ```javascript
-import { Display, DisplayManager, VCPFeatures } from "ddc-node-rs";
+import { Display, DisplayManager, VCPFeatures } from "ddc-rs";
 
 const displays = new DisplayManager().collect();
 
