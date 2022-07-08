@@ -34,5 +34,15 @@
   "bugs": {
     "url": "https://github.com/ThalusA/ddc-node-rs/issues"
   },
-  "homepage": "https://github.com/ThalusA/ddc-node-rs#readme"
+  "homepage": "https://github.com/ThalusA/ddc-node-rs#readme",
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.30.5",
+    "@typescript-eslint/parser": "^5.30.5",
+    "eslint": "^8.0.1",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-import": "^2.25.2",
+    "eslint-plugin-n": "^15.0.0",
+    "eslint-plugin-promise": "^6.0.0",
+    "typescript": "^4.7.4"
+  }
 }
