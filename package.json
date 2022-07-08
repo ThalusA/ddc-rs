@@ -1,5 +1,5 @@
 {
-  "name": "ddc-node-rs",
+  "name": "ddc-rs",
   "version": "0.1.0",
   "author": "Alexandre MONIER <alexandre.monierc@gmail.com>",
   "description": "DDC/CI high level library for NodeJS (cross platform)",
