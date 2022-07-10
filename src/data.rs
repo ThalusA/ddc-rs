@@ -3,6 +3,11 @@ use ddc_hi::Backend;
 use neon::prelude::*;
 use std::collections::BTreeMap;
 use std::str::FromStr;
+use ddc::Ddc;
+
+pub trait StructToObjectMut {
+    fn to_object_mut<'a>(&mut self, cx: &mut impl Context<'a>) -> JsResult<'a, JsObject>;
+}
 
 pub trait StructToObject {
     fn to_object<'a>(&self, cx: &mut impl Context<'a>) -> JsResult<'a, JsObject>;
@@ -14,8 +19,8 @@ pub trait StructFromObject<T> {
 
 pub use ddc_hi::Display;
 
-impl StructToObject for Display {
-    fn to_object<'a>(self: &Display, cx: &mut impl Context<'a>) -> JsResult<'a, JsObject> {
+impl StructToObjectMut for Display {
+    fn to_object_mut<'a>(&mut self, cx: &mut impl Context<'a>) -> JsResult<'a, JsObject> {
         let struct_object = cx.empty_object();
 
         let display_id = cx.string(self.info.id.clone());
@@ -69,6 +74,14 @@ impl StructToObject for Display {
         if let Some(edid_data) = &self.info.edid_data {
             let edid_data = byte_vec_to_bytearray(edid_data, cx)?;
             struct_object.set(cx, "edidData", edid_data)?;
+        }
+
+        if let Ok(capabilities_string) = &self.handle.capabilities_string() {
+            let capabilities_string = std::str::from_utf8(capabilities_string);
+            if capabilities_string.is_ok() {
+                let capabilities_string = cx.string(capabilities_string.unwrap());
+                struct_object.set(cx, "capabilities", capabilities_string)?;
+            }
         }
 
         let backend = cx.string(&self.info.backend.to_string());

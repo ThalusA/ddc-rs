@@ -231,4 +231,5 @@ export interface DisplayData {
     readonly manufacturerId?: string
     readonly manufactureYear?: number
     readonly manufactureWeek?: number
+    readonly capabilities?: string
 }

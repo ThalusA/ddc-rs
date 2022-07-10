@@ -32,6 +32,7 @@ export class Display {
     if (Object.hasOwn(effectiveData, 'manufacturerId')) this.manufacturerId = effectiveData.manufacturerId
     if (Object.hasOwn(effectiveData, 'manufactureYear')) this.manufactureYear = effectiveData.manufactureYear
     if (Object.hasOwn(effectiveData, 'manufactureWeek')) this.manufactureWeek = effectiveData.manufactureWeek
+    if (Object.hasOwn(effectiveData, 'capabilities')) this.capabilities = effectiveData.capabilities
   }
 
   getVcpFeature (featureCode: number): VCPValue {
@@ -59,6 +60,7 @@ export class Display {
   readonly manufacturerId?: string
   readonly manufactureYear?: number
   readonly manufactureWeek?: number
+  readonly capabilities?: string
 }
 
 export class DisplayManager {

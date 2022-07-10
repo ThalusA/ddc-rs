@@ -4,7 +4,7 @@ mod data;
 mod neon_utils;
 mod utils;
 
-use crate::data::{StructFromObject, StructToObject, VcpWriteValue};
+use crate::data::{StructFromObject, StructToObject, StructToObjectMut, VcpWriteValue};
 use ddc_hi::{FeatureCode, Query};
 use neon::prelude::*;
 use neon::types::buffer::TypedArray;
@@ -50,9 +50,9 @@ pub fn display_set_table_vcp_feature(mut cx: FunctionContext) -> JsResult<JsUnde
 pub fn display_manager_get_by_index(mut cx: FunctionContext) -> JsResult<JsObject> {
     let index = cx.argument::<JsNumber>(0)?.value(&mut cx) as usize;
 
-    let (index, display) =
+    let (index, mut display) =
         utils::get_display(false, index).or_else(|error| cx.throw_error(error.to_string()))?;
-    let display_object = display.to_object(&mut cx)?;
+    let display_object = display.to_object_mut(&mut cx)?;
     let index = cx.number(index as f64);
     display_object.set(&mut cx, "index", index)?;
 
@@ -80,8 +80,8 @@ pub fn display_manager_list(mut cx: FunctionContext) -> JsResult<JsArray> {
     let displays = utils::get_displays(false, final_query)
         .or_else(|error| cx.throw_error(error.to_string()))?;
     let displays_array = cx.empty_array();
-    for (array_index, (index, display)) in displays.into_iter().enumerate() {
-        let display_object = display.to_object(&mut cx)?;
+    for (array_index, (index, mut display)) in displays.into_iter().enumerate() {
+        let display_object = display.to_object_mut(&mut cx)?;
         let index = cx.number(index as f64);
         display_object.set(&mut cx, "index", index)?;
         displays_array.set(&mut cx, array_index as u32, display_object)?;
