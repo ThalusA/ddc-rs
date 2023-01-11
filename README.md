@@ -1,5 +1,9 @@
 # ddc-rs
 
+## Warning
+
+This repository will be unmaintained in favor of the async version, please check: https://github.com/ThalusA/ddc-node 
+
 `ddc-rs` is a cross-platform Node package for controlling monitors with
 [DDC/CI](https://en.wikipedia.org/wiki/Display_Data_Channel).
 
